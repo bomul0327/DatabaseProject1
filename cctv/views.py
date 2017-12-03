@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import Manager, Shoot_space, CCTV, Shoot, Files, Neighborhood, Sequence, Statistics, Record #DB Table과 HTML을 연결해주는 역할
 #테이블 이름은 cctv_'객체명' , eg: cctv_manager, cctv_shoot_space ...
 from django.db import connection #SQL로 insert into, delete, update를 하기위하여 필요.
-from .forms import manager_manage_form
+#from .forms import manager_manage_form #사용안함
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def login(request):
@@ -24,8 +24,10 @@ def manager_manage(request):
     manager_list = Manager.objects.raw('SELECT id, pos, phonenum from cctv_manager')
     with connection.cursor() as form:
         form = connection.cursor()
-        if request.method == "POST":
-            form.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)", [request.POST['id'], request.POST['pw'], request.POST['pos'], request.POST['phonenum']] )
+        if request.method == "POST" and request.POST['mode'] =="insert" :
+            form.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)", [request.POST['insert_id'], request.POST['pw'], request.POST['pos'], request.POST['phonenum']] )
+        elif request.method == "POST" and request.POST['mode'] =="delete" :
+            form.execute("DELETE FROM cctv_manager WHERE id = %s", [request.POST['delete_id']] )
 #    if request.method == "POST":
 #        form = manager_manage_form(request.POST)
 #        if form.is_valid():
@@ -33,6 +35,7 @@ def manager_manage(request):
 #    else:
 #        form = manager_manage_form()
     return render(request, 'cctv/manager_manage.html', {'manager_list' : manager_list, 'form': form})
+
 
 #def insert_sql(self):
 #    with connection.cursor() as cursor:
