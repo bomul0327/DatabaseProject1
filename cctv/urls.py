@@ -12,5 +12,5 @@ urlpatterns = [
     url(r'^manager_manage$', views.manager_manage, name='manager_manage'),
     url(r'^cctv_manage$', views.cctv_manage, name='cctv_manage'),
     url(r'^space_manage$', views.space_manage, name='space_manage'),
-    url(r'^post/new/$', views.post_new, name='post_new') # forms.py 을 위하여 추가한 것
+    #url(r'^post/new/$', views.post_new, name='post_new') # forms.py 을 위하여 추가한 것
 ]

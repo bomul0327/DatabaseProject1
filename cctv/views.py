@@ -22,34 +22,45 @@ def my_page(request):
 
 def manager_manage(request):
     manager_list = Manager.objects.raw('SELECT id, pos, phonenum from cctv_manager')
-    if request.method == "POST":
-        form = manager_manage_form(request.POST)
-        if form.is_valid():
-            post = form.save()
-            #return redirect('manager_manage', pk=post.pk)
-    else:
-        form = manager_manage_form()
+    with connection.cursor() as form:
+        form = connection.cursor()
+        if request.method == "POST":
+            form.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)", [request.POST['id'], request.POST['pw'], request.POST['pos'], request.POST['phonenum']] )
+#    if request.method == "POST":
+#        form = manager_manage_form(request.POST)
+#        if form.is_valid():
+#            post = form.save()
+#    else:
+#        form = manager_manage_form()
     return render(request, 'cctv/manager_manage.html', {'manager_list' : manager_list, 'form': form})
 
-#def manager_insert(request):
-#    form = manager_manage_form()
-#    return render(request, 'cctv/manager_manage.html', {'form': form})
+#def insert_sql(self):
+#    with connection.cursor() as cursor:
+#        cursor.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)", [self.id], [self.pw], [self.pos], [self.phonenum])
+#        row = cursor.fetchone()
+#    return row
+
 
 def post_new(request):
     form = manager_manage_form()
     return render(request, 'cctv/post_edit.html', {'form': form})
+
+def post_edit(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == "POST":
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.published_date = timezone.now()
+            post.save()
+            return redirect('post_detail', pk=post.pk)
+    else:
+        form = PostForm(instance=post)
+    return render(request, 'blog/post_edit.html', {'form': form})
 
 def cctv_manage(request):
     return render(request, 'cctv/cctv_manage.html', {})
 
 def space_manage(request):
     return render(request, 'cctv/space_manage.html', {})
-
-
-
-# Create your views here.
-#def my_custom_sql(self):
-#    with connection.cursor() as cursor:
-#        cursor.execute("INSERT INTO cctv_manager (id, pw, pos, phonenum) VALUES(%s, %s, %s, %s)", [self.id], [self.pw], [self.pos], [self.phonenum])
-#        row = cursor.fetchone() # cursor.fetchone() or cursor.fetchall() to return the resulting rows.
-#    return row
