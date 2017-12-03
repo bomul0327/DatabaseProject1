@@ -9,7 +9,7 @@ urlpatterns = [
     url(r'^file_manage$', views.file_manage, name='file_manage'),
     url(r'^log_read$', views.log_read, name='log_read'),
     url(r'^my_page$', views.my_page, name='my_page'),
-    url(r'^user_manage$', views.user_manage, name='user_manage'),
+    url(r'^manager_manage$', views.manager_manage, name='manager_manage'),
     url(r'^cctv_manage$', views.cctv_manage, name='cctv_manage'),
     url(r'^space_manage$', views.space_manage, name='space_manage'),
 ]
