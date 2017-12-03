@@ -21,13 +21,13 @@ def my_page(request):
     return render(request, 'cctv/my_page.html', {})
 
 def manager_manage(request):
-    manager_list = Manager.objects.raw('SELECT id, pos, phonenum from cctv_manager')
+    manager_list = Manager.objects.raw('SELECT id, pos, phonenum from cctv_manager WHERE id NOT IN ("admin")')
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="insert" :
             form.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)", [request.POST['insert_id'], request.POST['pw'], request.POST['pos'], request.POST['phonenum']] )
         elif request.method == "POST" and request.POST['mode'] =="delete" :
-            form.execute("DELETE FROM cctv_manager WHERE id = %s", [request.POST['delete_id']] )
+            form.execute('DELETE FROM cctv_manager WHERE id = %s AND id NOT IN ("admin")', [request.POST['delete_id']] )
 #    if request.method == "POST":
 #        form = manager_manage_form(request.POST)
 #        if form.is_valid():
