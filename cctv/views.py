@@ -1,6 +1,9 @@
 from django.shortcuts import render
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+def login(request):
+    return render(request, 'cctv/login.html', {})
+
 def shoot_space_manage(request):
     return render(request, 'cctv/shoot_space_manage.html', {})
 
