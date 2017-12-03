@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cctv' # cctv app 추가, by 학수
+    'cctv' # cctv app 추가
 ]
 
 MIDDLEWARE = [

@@ -6,6 +6,12 @@
 <body>
 <p>일반관리자 관리 페이지</p>
 
+{% for manager in manager_list %}
+    <div>
+        <p>ID : {{ manager.id }}, 직위 : {{manager.pos}}, 전화번호 : {{manager.phonenum}} </p>
+    </div>
+{% endfor %}
+
 
 </body>
 </html>
