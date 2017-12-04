@@ -1,15 +1,25 @@
 {% extends 'cctv/base.html' %}
 {% block content %}
   <p>일반관리자 관리 페이지</p>
-
+  <p>관리자 검색</p>
+  <form method="POST" class="post-form">{% csrf_token %}
+      <!--{{ form.as_p }}-->
+      <p><label for="manager_id">관리자:</label>
+        <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+      <p><label for="pos">직위:</label>
+        <input name="pos" id="pos" type="text" maxlength="20"/></p>
+      <p><label for="phonenum">전화번호:</label>
+        <input name="phonenum" id="phonenum" type="text" maxlength="20"/></p>
+      <p><label for="cctv_id">관리CCTV ID:</label>
+        <input name="cctv_id" id="cctv_id" type="text" maxlength="20"/></p>
+      <button type="submit" name="mode" value="select" class="save btn btn-default">검색</button>
+  </form>
   <p>관리자 목록</p>
   {% for manager in manager_list %}
   <div>
-    <p>ID : {{ manager.id }}, 직위 : {{manager.pos}}, 전화번호 : {{manager.phonenum}} </p>
+    <p>ID : {{ manager.id }}, 직위 : {{manager.pos}}, 전화번호 : {{manager.phonenum}}, 관리CCTV ID : {{manager.cctv_id}} </p>
   </div>
   {% endfor %}
-
-
   <p>관리자 추가</p>
   <form method="POST" class="post-form">{% csrf_token %}
       <!--{{ form.as_p }}-->

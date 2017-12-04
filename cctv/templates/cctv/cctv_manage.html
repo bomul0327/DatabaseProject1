@@ -5,9 +5,9 @@
 <form method="POST" class="post-form">{% csrf_token %}
     <!--{{ form.as_p }}-->
     <p><label for="model_name">모델명:</label>
-      <input name="model_name" id="model_name" type="text" maxlength="20" default="%"/></p>
+      <input name="model_name" id="model_name" type="text" maxlength="20"/></p>
     <p><label for="manager_id">책임자:</label>
-      <input name="manager_id" id="manager_id" type="text" maxlength="20" default="%"/></p>
+      <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
     <button type="submit" name="mode" value="select" class="save btn btn-default">검색</button>
 </form>
 <p>CCTV 목록</p>
