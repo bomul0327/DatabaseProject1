@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', '.pythonanywhere.com']
 
+AUTH_USER_MODEL = 'cctv.Manager'
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/manager_manage'
 
 # Application definition
 
@@ -37,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cctv' # cctv app 추가
+    'cctv' # cctv app 추가, by 학수
 ]
 
 MIDDLEWARE = [

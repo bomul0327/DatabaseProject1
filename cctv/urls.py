@@ -4,7 +4,7 @@ from . import views
 
 #cctv/views.py에서 정의된 def 함수명(request)에서 함수명을 아래에 url(regular expresstion, views.함수명, name='함수명'),으로 추가하기
 urlpatterns = [
-    url(r'^$', views.login, name='login'),
+    url(r'^login/$', views.login, name='login'),
     url(r'^shoot_space_manage$', views.shoot_space_manage, name='shoot_space_manage'),
     url(r'^file_manage$', views.file_manage, name='file_manage'),
     url(r'^log_read$', views.log_read, name='log_read'),

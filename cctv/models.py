@@ -1,8 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
-class Manager(models.Model):
+class Manager(AbstractUser):
     id = models.CharField(max_length=20, primary_key=True, null=False)
     pw = models.CharField(max_length=20, null=False)
     pos = models.CharField(max_length=20)

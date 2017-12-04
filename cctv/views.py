@@ -3,10 +3,18 @@ from .models import Manager, Shoot_space, CCTV, Shoot, Files, Neighborhood, Sequ
 #테이블 이름은 cctv_'객체명' , eg: cctv_manager, cctv_shoot_space ...
 from django.db import connection #SQL로 insert into, delete, update를 하기위하여 필요.
 #from .forms import manager_manage_form #사용안함
+from django.http import HttpResponse
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def login(request):
+    request.session['login_sess'] = 'cctv'
     return render(request, 'cctv/login.html', {})
+    #return HttpResponse('[%s] logged in successfully' % request.session['login_sess'])
+
+def logout(request):
+    del request.session['login_sess']
+    return HttpResponse('logged out successfully')
+    #return render(request, 'cctv/login.html', {})
 
 def shoot_space_manage(request):
     return render(request, 'cctv/shoot_space_manage.html', {})
