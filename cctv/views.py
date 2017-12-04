@@ -82,11 +82,11 @@ def cctv_manage(request):
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
     if request.method == "POST":
         model_name = request.POST['model_name'] # 여기부터
-        if model_name == "":                    # 공백이 입력된 경우 전체 값을 검색함
+        if model_name == "":                    # model_name에 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
             model_name = "%"                    # 여기까지
-        manager_id = request.POST['manager_id']
-        if manager_id == "":
-            manager_id = "%"
+        manager_id = request.POST['manager_id'] # 여기부터
+        if manager_id == "":                    # manager_id에 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            manager_id = "%"                    # 여기까지
         cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE model_name like %s AND manager_id like %s', [model_name, manager_id])
     with connection.cursor() as form:
         form = connection.cursor()
