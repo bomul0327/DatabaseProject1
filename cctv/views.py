@@ -31,11 +31,26 @@ def log_read(request):
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def my_page(request):
-    return render(request, 'cctv/my_page.html', {})
+    if request.method == "POST" and request.POST['mode'] =="select":
+        manager = Manager.objects.raw('SELECT id, pos, phonenum FROM cctv_manager WHERE id = %s', [request.POST['manager_id']])
+        cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.POST['manager_id']])
+        return render(request, 'cctv/my_page.html', {'manager' : manager, 'cctv_list' : cctv_list})
+    with connection.cursor() as form:
+        form = connection.cursor()
+        if request.method == "POST" and request.POST['mode'] =="update" :
+            pos = request.POST['pos']
+            phonenum = request.POST['phonenum']
+            if pos == "" and phonenum != "":
+                form.execute("UPDATE cctv_manager SET phonenum = %s WHERE id = %s", [phonenum, request.POST['manager_id']] )
+            elif pos != "" and phonenum == "":
+                form.execute("UPDATE cctv_manager SET pos = %s WHERE id = %s", [pos, request.POST['manager_id']] )
+            elif pos != "" and phonenum != "":
+                form.execute("UPDATE cctv_manager SET pos = %s, phonenum = %s WHERE id = %s", [pos, phonenum, request.POST['manager_id']] )
+    return render(request, 'cctv/my_page.html', {'form' : form})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def manager_manage(request):
-    manager_list = Manager.objects.raw('SELECT manager.id, manager.pos, manager.phonenum, cctv.id AS cctv_id FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id NOT IN ("admin")')
+    manager_list = Manager.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id NOT IN ("admin")')
     if request.method == "POST" and request.POST['mode'] =="select":
         manager_id = request.POST['manager_id']         # 여기부터
         if manager_id == "":                            # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
@@ -48,12 +63,12 @@ def manager_manage(request):
             phonenum = "%"                              # 여기까지
         cctv_id = request.POST['cctv_id']
         if cctv_id == "" and (manager_id == "%" and pos == "%" and phonenum =="%"):  #검색 칸이 전부 빈공간인 경우 전체 검색
-            manager_list = Manager.objects.raw('SELECT manager.id, manager.pos, manager.phonenum, cctv.id AS cctv_id FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id NOT IN ("admin")')
+            manager_list = Manager.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id NOT IN ("admin")')
             return render(request, 'cctv/manager_manage.html', {'manager_list' : manager_list})
         if cctv_id == "" and not(manager_id == "%" and pos == "%" and phonenum =="%"):  #관리 CCTV ID 칸만 빈칸인 경우 cctv_id 는 조건절에서 제외하고 검색
-            manager_list = Manager.objects.raw('SELECT manager.id, manager.pos, manager.phonenum, cctv.id AS cctv_id FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id like %s AND manager.pos like %s AND manager.phonenum like %s', [manager_id, pos, phonenum])
+            manager_list = Manager.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id like %s AND manager.pos like %s AND manager.phonenum like %s', [manager_id, pos, phonenum])
             return render(request, 'cctv/manager_manage.html', {'manager_list' : manager_list})
-        manager_list = CCTV.objects.raw('SELECT manager.id, manager.pos, manager.phonenum, cctv.id AS cctv_id FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id like %s AND manager.pos like %s AND manager.phonenum like %s AND cctv.id like %s', [manager_id, pos, phonenum, cctv_id])
+        manager_list = CCTV.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id like %s AND manager.pos like %s AND manager.phonenum like %s AND cctv.id like %s', [manager_id, pos, phonenum, cctv_id])
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="insert" :
