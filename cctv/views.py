@@ -29,7 +29,7 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
         if request.method == "POST" and request.POST['mode'] =="insert" :
             #문제점 : install_date 타입이 DateTimeField 인데 이게 입력이 잘 안됩니다.
             #shoot = Shoot.objects.raw('SELECT cctv_id_id FROM cctv_shoot WHERE cctv_id_id = %s', [request.POST['cctv_id']])
-            #if(shoot.___str___ == "") 윗줄과 이거 주석 해제하고 아래 form 한칸 들여쓰기
+            #if(shoot.___str___ == "") #shoot.___str___이 cctv_id_id 를 리턴하는가 확인. 윗줄과 이거 주석 해제하고 아래 form 한칸 들여쓰기
             form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)", [request.POST['cctv_id'], request.POST['shoot_space_id']] )
         elif request.method == "POST" and request.POST['mode'] =="delete" :
             form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [request.POST['cctv_id'], request.POST['shoot_space_id']])
@@ -42,7 +42,26 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def file_manage(request):
-    return render(request, 'cctv/file_manage.html', {})
+    files_list = Files.objects.raw('SELECT file_name, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
+    if request.method == "POST" and request.POST['mode'] =="select":
+        cctv_id = request.POST['cctv_id']         # 여기부터
+        if cctv_id == "":                            # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            cctv_id = "%"                            # 여기까지
+        shoot_space_id = request.POST['shoot_space_id']                       # 여기부터
+        if shoot_space_id == "":                                   # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            shoot_space_id = "%"                                   # 여기까지
+        start_time = request.POST['start_time']             # 여기부터
+        if start_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            start_time = "%"                              # 여기까지
+        end_time = request.POST['end_time']             # 여기부터
+        if end_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            end_time = "%"                              # 여기까지
+        files_list = Files.objects.raw('SELECT file_name, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files WHERE CCTV_id like %s AND shoot_space_id like %s AND start_time like %s AND end_time like %s', [cctv_id, shoot_space_id, start_time, end_time])
+    with connection.cursor() as form:
+        form = connection.cursor()
+        if request.method == "POST" and request.POST['mode'] =="insert" :
+            form.execute("INSERT INTO cctv_files ('file_name', 'start_time', 'end_time', 'CCTV_id_id', 'Shoot_space_id_id') VALUES(%s, %s, %s, %s, %s)", [request.POST['file_name'], request.POST['start_time'], request.POST['end_time'], request.POST['cctv_id'], request.POST['shoot_space_id']] )
+    return render(request, 'cctv/file_manage.html', {'files_list': files_list})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def log_read(request):
