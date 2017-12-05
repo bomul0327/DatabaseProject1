@@ -11,6 +11,43 @@
         <div class="page-header">
             <h3>CCTV 관리 프로그램</a></h3>
         </div>
+        <nav>
+          <h1>일반 관리자 메뉴</h1>
+          <ul>
+            <li><a href = 'shoot_space_manage'>촬영공간 관리</a></li>
+            <li><a href = 'file_manage'>파일관리</a></li>
+            <li><a href = 'log_read'>로그열람</a></li>
+            <li><a href = 'my_page'>My page</a></li>                 
+          </ul>
+          <h1>최고 관리자 메뉴</h1>
+          <ul>
+            <li><a href = 'manager_manage'>일반관리자 관리</a></li>
+            <li><a href = 'cctv_manage'>CCTV 관리</a></li>
+            <li><a href = 'space_manage'>공간관리</a></li>
+          </ul>
+        </nav>
+        <style>
+          nav{
+            width:200px;
+            border-right:1px solid #ddd;
+
+            position:fixed;
+            height:100%
+          }
+          h1{ font-size:18px; padding:20px;}
+          .menu {}
+          .menu li {}
+
+          .menu li a {
+            height:30px;
+            line-height:30px;
+            display:block;
+            padding:0 20px;
+            font-size:12px;
+            color:#555;
+          }
+          .menu li a:honve { backgound-color:yellowgreen; color:white;}
+        </style>
         <div class="content container">
             <div class="row">
                 <div class="col-md-8">

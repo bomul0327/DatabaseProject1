@@ -1,6 +1,7 @@
 {% extends 'cctv/base.html' %}
 {% block content %}
 <p>My page</p>
+<p>---------------------------------------------------------------------
 <p>내정보</p>
 <!-- 세션키 받기 전 임시 아이디 입력구간 시작-->
 <form method="POST" class="post-form">{% csrf_token %}
@@ -15,12 +16,14 @@
 {% for manager in manager %}
 <p>ID : {{ manager.id }}, 직위 : {{ manager.pos }}, 전화번호 : {{ manager.phonenum }} </p>
 {% endfor %}
+<p>---------------------------------------------------------------------
 <p>관리CCTV 목록</p>
 {% for cctv in cctv_list %}
 <div>
   <p>CCTV ID : {{cctv.id}} </p>
 </div>
 {% endfor %}
+<p>---------------------------------------------------------------------
 <p>내정보 수정</p>
 <form method="POST" class="post-form">{% csrf_token %}
     <!--{{ form.as_p }}-->
@@ -34,5 +37,6 @@
       <input name="phonenum" id="phonenum" type="text" maxlength="20"/></p>
     <button type="submit" name="mode" value="update" class="save btn btn-default">수정</button>
 </form>
+<p>---------------------------------------------------------------------
 
 {% endblock %}

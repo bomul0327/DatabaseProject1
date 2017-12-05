@@ -1,6 +1,7 @@
 {% extends 'cctv/base.html' %}
 {% block content %}
 <p>파일관리 페이지</p>
+<p>---------------------------------------------------------------------
 <p>파일 검색</p>
 <form method="POST" class="post-form">{% csrf_token %}
     <!--{{ form.as_p }}-->
@@ -14,12 +15,14 @@
       <input name="end_time" id="end_time" type="text" maxlength="20"/></p>
     <button type="submit" name="mode" value="select" class="save btn btn-default">검색</button>
 </form>
+<p>---------------------------------------------------------------------
 <p>파일 목록</p>
 {% for files in files_list %}
 <div>
   <p>ID : {{ manager.id }}, 직위 : {{manager.pos}}, 전화번호 : {{manager.phonenum}} </p>
 </div>
 {% endfor %}
+<p>---------------------------------------------------------------------
 <p>파일 업로드</p>
 <form method="POST" class="post-form">{% csrf_token %}
     <!--{{ form.as_p }}-->
@@ -35,5 +38,6 @@
       <input name="end_time" id="end_time" type="text" maxlength="20"/></p>
     <button type="submit" name="mode" value="insert" class="save btn btn-default">업로드</button>
 </form>
+<p>---------------------------------------------------------------------
 
 {% endblock %}

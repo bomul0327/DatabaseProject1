@@ -3,12 +3,14 @@
 <p>공간 관리 페이지</p>
   <form method="POST" class="post-form">{% csrf_token %}
     <!--{{ form.as_p }}-->
+    <p>---------------------------------------------------------------------
     <p>공간 목록</p>
     {% for space in space_list %}
     <div>
       <p>공간 ID: {{ space.id }}, 행정동: {{ space.dong }}, 건물명: {{ space.building_name}}, 층수: {{ space.flr }}, 실내위치: {{ space.location }} </p>
     </div>
     {% endfor %}
+    <p>---------------------------------------------------------------------
     <p>공간 추가</p>
     <p><label for="shoot_space_id">촬영공간 ID:</label>
       <input name="shoot_space_id" id="shoot_space_id" type="text" maxlength="20" required></p>
@@ -22,11 +24,13 @@
       <input name="location" id="location" type="text" maxlength="20" required></p>
     <button type="submit" name="mode" value="insert" class="save btn btn-default">등록</button>
   </form>
+  <p>---------------------------------------------------------------------
   <p>공간 삭제</p>
   <form method="POST" class="post-form">{% csrf_token %}
     <p><label for="shoot_space_id">촬영공간 ID:</label>
       <input name="shoot_space_id" id="shoot_space_id" type="text" maxlength="20" required></p>
     <button type="submit" name="mode" value="delete" class="save btn btn-defalut">삭제</button>
   </form>
+  <p>---------------------------------------------------------------------
 
 {% endblock %}
