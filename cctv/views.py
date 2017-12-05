@@ -18,8 +18,25 @@ def logout(request):
     #return render(request, 'cctv/login.html', {})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
-def shoot_space_manage(request):
-    return render(request, 'cctv/shoot_space_manage.html', {})
+def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
+    space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
+    if request.method == "POST" and request.POST['mode'] =="select":
+        shoot_space_list = Shoot_space.objects.raw('SELECT cc.id, ss.id AS space_id , ss.dong, ss.building_name, ss.flr, ss.location FROM cctv_shoot_space AS ss, cctv_shoot AS sh, cctv_cctv AS cc WHERE ss.id = sh.Shoot_space_id_id AND cc.id = sh.CCTV_id_id AND cc.manager_id = %s', [request.POST['manager_id']])
+        cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.POST['manager_id']])
+        return render(request, 'cctv/shoot_space_manage.html', {'space_list' : space_list, 'shoot_space_list' : shoot_space_list, 'cctv_list' : cctv_list})
+    with connection.cursor() as form:
+        form = connection.cursor()
+        if request.method == "POST" and request.POST['mode'] =="insert" :
+            #문제점 : install_date 타입이 DateTimeField 인데 이게 입력이 잘 안됩니다.
+            form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)", [request.POST['cctv_id'], request.POST['shoot_space_id']] )
+        elif request.method == "POST" and request.POST['mode'] =="delete" :
+            form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [request.POST['cctv_id'], request.POST['shoot_space_id']])
+            #form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [[request.POST['cctv_id'], request.POST['shoot_space_id']])
+        elif request.method == "POST" and request.POST['mode'] == "update" :
+            cctv_id = request.POST['cctv_id']
+            shoot_space_id = request.POST['shoot_space_id']
+            form.execute("UPDATE cctv_shoot SET shoot_space_id_id = %s WHERE cctv_id_id = %s", [shoot_space_id, cctv_id] )
+    return render(request, 'cctv/shoot_space_manage.html', {'space_list' : space_list })
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def file_manage(request):
@@ -129,4 +146,12 @@ def cctv_manage(request):
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def space_manage(request):
-    return render(request, 'cctv/space_manage.html', {})
+    space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
+    with connection.cursor() as form:
+        form = connection.cursor()
+        if request.method == "POST" and request.POST['mode'] =="insert" :
+            #문제점 : install_date 타입이 DateTimeField 인데 이게 입력이 잘 안됩니다.
+            form.execute("INSERT INTO cctv_shoot_space ('id', 'dong', 'building_name', 'flr', 'location') VALUES(%s, %s, %s, %s, %s)", [request.POST['shoot_space_id'], request.POST['dong'], request.POST['building_name'], request.POST['flr'], request.POST['location']] )
+        elif request.method == "POST" and request.POST['mode'] =="delete" :
+            form.execute('DELETE FROM cctv_shoot_space WHERE id = %s', [request.POST['shoot_space_id']])
+    return render(request, 'cctv/space_manage.html', {'space_list' : space_list})
