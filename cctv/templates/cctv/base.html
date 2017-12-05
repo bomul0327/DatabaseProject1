@@ -8,9 +8,17 @@
         <link rel="stylesheet" href="{% static 'css/blog.css' %}">
     </head>
     <body>
+        <header>
         <div class="page-header">
-            <h3>CCTV 관리 프로그램</a></h3>
+          <h3>CCTV 관리 프로그램</a></h3>
         </div>
+        </header>
+        <style>
+          header{
+          }
+        </style>
+        <article>
+        <aside>
         <nav>
           <h1>일반 관리자 메뉴</h1>
           <ul>
@@ -27,16 +35,24 @@
             <li><a href = 'shoot_space_manage'>촬영공간 관리</a></li>
             <li><a href = 'file_manage'>파일관리</a></li>
             <li><a href = 'log_read'>로그열람</a></li>
-            <li><a href = 'my_page'>My page</a></li> 
+            <li><a href = 'my_page'>My page</a></li>
           </ul>
         </nav>
+        </aside>
+        <content>
+                {% block content %}
+                {% endblock %}
+        </content>
         <style>
+          body{}
+          article{}
+          header{}
+          aside{float:right; width:250px; padding: 0px; height: 100%;}
+          content{margin-left: 250px; padding: 20px;}
           nav{
             width:200px;
-            border-right:1px solid #ddd;
-
-            position:fixed;
-            height:100%
+            border-left:1px solid #ddd;
+            height: 100%;
           }
           h1{ font-size:18px; padding:20px;}
           .menu {}
@@ -52,13 +68,6 @@
           }
           .menu li a:honve { backgound-color:yellowgreen; color:white;}
         </style>
-        <div class="content container">
-            <div class="row">
-                <div class="col-md-8">
-                {% block content %}
-                {% endblock %}
-                </div>
-            </div>
-        </div>
+      </article>
     </body>
 </html>

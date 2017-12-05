@@ -61,6 +61,8 @@ def file_manage(request):
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="insert" :
             form.execute("INSERT INTO cctv_files ('file_name', 'start_time', 'end_time', 'CCTV_id_id', 'Shoot_space_id_id') VALUES(%s, %s, %s, %s, %s)", [request.POST['file_name'], request.POST['start_time'], request.POST['end_time'], request.POST['cctv_id'], request.POST['shoot_space_id']] )
+            # CCTV_id_id 나 Shoot_space_id_id 에 값이 안들어가는 경우(존재 하지 않는 CCTV ID나 Space ID 입력한 경우) 삭제
+            #form.execute("DELETE FROM cctv_files WHERE CCTV_id_id IS NULL OR Shoot_space_id_id IS NULL")
     return render(request, 'cctv/file_manage.html', {'files_list': files_list})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
