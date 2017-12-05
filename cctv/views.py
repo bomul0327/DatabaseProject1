@@ -28,6 +28,8 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="insert" :
             #문제점 : install_date 타입이 DateTimeField 인데 이게 입력이 잘 안됩니다.
+            #shoot = Shoot.objects.raw('SELECT cctv_id_id FROM cctv_shoot WHERE cctv_id_id = %s', [request.POST['cctv_id']])
+            #if(shoot.___str___ == "") 윗줄과 이거 주석 해제하고 아래 form 한칸 들여쓰기
             form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)", [request.POST['cctv_id'], request.POST['shoot_space_id']] )
         elif request.method == "POST" and request.POST['mode'] =="delete" :
             form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [request.POST['cctv_id'], request.POST['shoot_space_id']])

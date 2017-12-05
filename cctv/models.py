@@ -26,7 +26,8 @@ class CCTV(models.Model):
 class Shoot (models.Model):
     CCTV_id = models.ForeignKey(CCTV, on_delete=models.CASCADE, null=False)
     Shoot_space_id = models.ForeignKey(Shoot_space, on_delete=models.CASCADE, null=False)
-
+    def __str__(self):
+        return self.CCTV_id
 class Files(models.Model):
     file_name =  models.CharField(max_length=20, primary_key=True, null=False)
     start_time = models.DateTimeField('start time')
