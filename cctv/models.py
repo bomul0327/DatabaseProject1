@@ -9,6 +9,10 @@ class Manager(models.Model):
     def __str__(self):
         return self.id
 
+    # get user information
+    def get_user(self):
+        return User.objects.get(pk=self.user_id)
+
 class Shoot_space(models.Model):
     id = models.CharField(max_length=20, primary_key=True, null=False)
     dong = models.CharField(max_length=20)
@@ -75,3 +79,6 @@ class Record(models.Model):
     file_name = models.ForeignKey(Files, null=False, on_delete=models.DO_NOTHING)
     def __str__(self):
         return self.file_name + ":" + self.time_stamp
+
+class Document(models.Model):
+    docfile = models.FileField(upload_to='documents/%Y/%m/%d')

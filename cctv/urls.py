@@ -25,5 +25,7 @@ urlpatterns = [
             'next_page': settings.LOGIN_URL,
         }
     ),
+    url(r'^uploadfile/$', 'upload_file'),
+    
 
 ]
