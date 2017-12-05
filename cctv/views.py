@@ -56,7 +56,7 @@ def file_manage(request):
         end_time = request.POST['end_time']             # 여기부터
         if end_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
             end_time = "%"                              # 여기까지
-        files_list = Files.objects.raw('SELECT file_name, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files WHERE CCTV_id like %s AND shoot_space_id like %s AND start_time like %s AND end_time like %s', [cctv_id, shoot_space_id, start_time, end_time])
+        files_list = Files.objects.raw('SELECT file_name, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files WHERE CCTV_id_id like %s AND Shoot_space_id_id like %s AND start_time like %s AND end_time like %s', [cctv_id, shoot_space_id, start_time, end_time])
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="insert" :
