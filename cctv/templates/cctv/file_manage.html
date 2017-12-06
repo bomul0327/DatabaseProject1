@@ -1,0 +1,36 @@
+{% extends 'cctv/base.html' %}
+{% block content %}
+<p>파일관리 페이지</p>
+<p>---------------------------------------------------------------------
+<p>파일 검색</p>
+<form method="POST" class="post-form">{% csrf_token %}
+    <!--{{ form.as_p }}-->
+    <p><label for="cctv_id">CCTV ID:</label>
+      <input name="cctv_id" id="cctv_id" type="text" maxlength="20"/></p>
+    <p><label for="shoot_space_id">촬영공간:</label>
+      <input name="shoot_space_id" id="shoot_space_id" type="text" maxlength="20"/></p>
+    <p><label for="start_time">시작 시간:</label>
+      <input name="start_time" id="start_time" type="text" maxlength="20"/></p>
+    <p><label for="end_time">끝 시간:</label>
+      <input name="end_time" id="end_time" type="text" maxlength="20"/></p>
+    <button type="submit" name="mode" value="select" class="save btn btn-default">검색</button>
+</form>
+<p>---------------------------------------------------------------------
+<p>파일 목록</p>
+{% for files in files_list %}
+<div>
+  <p>파일명 : {{ files.file }}, CCTV ID : {{files.CCTV_id_id}}, 촬영공간 : {{files.Shoot_space_id_id}}, 시작시간: {{files.start_time}}, 끝시간: {{files.end_time}} </p>
+</div>
+{% endfor %}
+<p>---------------------------------------------------------------------
+<p>파일 업로드</p>
+<form method="POST" class="post-form" action="" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p>
+    <button type="submit" name="mode" value="upload" class="save btn btn-default">업로드</button>
+    </p>
+</form>
+<p>---------------------------------------------------------------------
+
+{% endblock %}

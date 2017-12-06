@@ -1,22 +1,29 @@
+<!--<!DOCTYPE html>
 <html>
-    <head>
-        <title>로그인 페이지</title>
-        <meta charset="utf-8" >
-    </head>
-    <body>
-        로그인 페이지<br/>
-        <hr/>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+<p>로그인 페이지</p>
+<p>ID : <input type="text" name="id"></p>
+<p>PASSWORD : <input type="password" name="password"></p>
+<input type="submit" value="Login">
 
-        {% if form.errors %}
-        <p>ID나 비밀번호가 일치하지 않습니다.</p>
-        {% endif %}
+</body>
+</html>-->
 
-         <form name="login_form" method="post" action="{% url 'index' %}">
+{% extends 'cctv/base.html' %}
+{% block content %}
+
+{% if form.errors %}
+<p>ID나 비밀번호가 일치하지 않습니다.</p>
+{% endif %}
+
+<form name="login_form" method="post" action="{% url 'login' %}">
          {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}" />
             {{ form.as_p }}
             <button type="submit">로그인</button>
         </form>
 
-    </body>
-</html>
+{% endblock %}

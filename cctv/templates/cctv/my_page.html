@@ -1,0 +1,42 @@
+{% extends 'cctv/base.html' %}
+{% block content %}
+<p>My page</p>
+<p>---------------------------------------------------------------------
+<p>내정보</p>
+<!-- 세션키 받기 전 임시 아이디 입력구간 시작-->
+<form method="POST" class="post-form">{% csrf_token %}
+    <!--{{ form.as_p }}-->
+    <p>---세션키 받기전 임시 입력창---
+    <p><label for="manager_id">아이디:</label>
+      <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+    <button type="submit" name="mode" value="select" class="save btn btn-default">입력</button>
+    <p>-----세션키 받으면 제거--------
+</form>
+<!-- 세션키 받기 전 임시 아이디 입력구간 끝-->
+{% for manager in manager %}
+<p>ID : {{ manager.id }}, 직위 : {{ manager.pos }}, 전화번호 : {{ manager.phonenum }} </p>
+{% endfor %}
+<p>---------------------------------------------------------------------
+<p>관리CCTV 목록</p>
+{% for cctv in cctv_list %}
+<div>
+  <p>CCTV ID : {{cctv.id}} </p>
+</div>
+{% endfor %}
+<p>---------------------------------------------------------------------
+<p>내정보 수정</p>
+<form method="POST" class="post-form">{% csrf_token %}
+    <!--{{ form.as_p }}-->
+    <p>---세션키 받기전 임시 입력창---
+    <p><label for="manager_id">아이디:</label>
+      <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+      <p>-----세션키 받으면 제거--------
+    <p><label for="pos">직위:</label>
+      <input name="pos" id="pos" type="text" maxlength="20"/></p>
+    <p><label for="phonenum">전화번호:</label>
+      <input name="phonenum" id="phonenum" type="text" maxlength="20"/></p>
+    <button type="submit" name="mode" value="update" class="save btn btn-default">수정</button>
+</form>
+<p>---------------------------------------------------------------------
+
+{% endblock %}

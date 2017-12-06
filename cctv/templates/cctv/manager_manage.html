@@ -1,0 +1,49 @@
+{% extends 'cctv/base.html' %}
+{% block content %}
+  <p>일반관리자 관리 페이지</p>
+  <p>---------------------------------------------------------------------
+  <p>관리자 검색</p>
+  <form method="POST" class="post-form">{% csrf_token %}
+      <!--{{ form.as_p }}-->
+      <p><label for="manager_id">관리자:</label>
+        <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+      <p><label for="pos">직위:</label>
+        <input name="pos" id="pos" type="text" maxlength="20"/></p>
+      <p><label for="phonenum">전화번호:</label>
+        <input name="phonenum" id="phonenum" type="text" maxlength="20"/></p>
+      <p><label for="cctv_id">관리CCTV ID:</label>
+        <input name="cctv_id" id="cctv_id" type="text" maxlength="20"/></p>
+      <button type="submit" name="mode" value="select" class="save btn btn-default">검색</button>
+  </form>
+  <p>---------------------------------------------------------------------
+  <p>관리자 목록</p>
+  {% for manager in manager_list %}
+  <div>
+    <p>ID : {{ manager.id }}, 직위 : {{manager.pos}}, 전화번호 : {{manager.phonenum}} </p>
+  </div>
+  {% endfor %}
+  <p>---------------------------------------------------------------------
+  <p>관리자 추가</p>
+  <form method="POST" class="post-form">{% csrf_token %}
+      <!--{{ form.as_p }}-->
+      <p><label for="insert_id">아이디:</label>
+        <input name="insert_id" id="insert_id" type="text" maxlength="20" required /></p>
+      <p><label for="pw">비밀번호:</label>
+        <input name="pw" id="pw" type="password" maxlength="20" required></p>
+      <p><label for="pos">직책:</label>
+        <input name="pos" id="pos" type="text" maxlength="20" required></p>
+      <p><label for="phonenum">휴대폰번호:</label>
+        <input name="phonenum" id="phonenum" type="text" maxlength="13" required></p>
+      <button type="submit" name="mode" value="insert" class="save btn btn-default">등록</button>
+  </form>
+  <p>---------------------------------------------------------------------
+  <p>관리자 삭제</p>
+  <form method="POST" class="post-form">{% csrf_token %}
+      <p><label for="delete_id">아이디:</label>
+        <input name="delete_id" id="delete_id" type="text" maxlength="20" required></p>
+      <button type="submit" name="mode" value="delete" class="save btn btn-defalut">삭제</button>
+  </form>
+  <p>---------------------------------------------------------------------
+
+<!--  <p>ID : <input type="text" name="id"></p> -->
+{% endblock %}
