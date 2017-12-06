@@ -1,0 +1,45 @@
+{% extends 'cctv/base.html' %}
+{% block content %}
+<p>CCTV 관리 페이지</p>
+<p>---------------------------------------------------------------------
+<p>CCTV 검색</p>
+<form method="POST" class="post-form">{% csrf_token %}
+    <!--{{ form.as_p }}-->
+    <p><label for="model_name">모델명:</label>
+      <input name="model_name" id="model_name" type="text" maxlength="20"/></p>
+    <p><label for="manager_id">책임자:</label>
+      <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+    <p><label for="install_date">설치날짜:</label>
+      <input name="install_date" id="install_date" type="text" maxlength="20"/> 입력예: 2017-12-06 23:59:59</p>
+    <button type="submit" name="mode" value="select" class="save btn btn-default">검색</button>
+</form>
+<p>---------------------------------------------------------------------
+<p>CCTV 목록</p>
+{% for cctv in cctv_list %}
+<div>
+  <p>ID: {{cctv.id}} 모델명 : {{cctv.model_name}}, 책임자 : {{ cctv.manager_id }}, 설치날짜 : {{cctv.install_date}} </p>
+</div>
+{% endfor %}
+<p>---------------------------------------------------------------------
+<p>CCTV 추가</p>
+<form method="POST" class="post-form">{% csrf_token %}
+    <!--{{ form.as_p }}-->
+    <p><label for="insert_id">아이디:</label>
+      <input name="insert_id" id="insert_id" type="text" maxlength="20" required /></p>
+    <p><label for="model_name">모델명:</label>
+      <input name="model_name" id="model_name" type="text" maxlength="20" required></p>
+    <p><label for="manager_id">관리자:</label>
+      <input name="manager_id" id="manager_id" type="text" maxlength="20" required></p>
+    <p><label for="install_date">설치날짜:</label>
+      <input name="install_date" id="install_date" type="text" maxlength="20" required> 입력예: 2017-12-06 23:59:59 (주의: 입력된 값이 9시간 차이나는지 확인 ex: 날짜 00:00:00 -> 날짜 09:00:00 과 같이 표기될 수 있음)</p>
+    <button type="submit" name="mode" value="insert" class="save btn btn-default">등록</button>
+</form>
+<p>---------------------------------------------------------------------
+<p>CCTV 삭제</p>
+<form method="POST" class="post-form">{% csrf_token %}
+    <p><label for="delete_id">ID:</label>
+      <input name="delete_id" id="delete_id" type="text" maxlength="20" required></p>
+    <button type="submit" name="mode" value="delete" class="save btn btn-defalut">삭제</button>
+</form>
+<p>---------------------------------------------------------------------
+{% endblock %}

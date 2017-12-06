@@ -1,0 +1,80 @@
+{% extends 'cctv/base.html' %}
+{% block content %}
+  <p>CCTV 촬영공간 관리 페이지</p>
+  <form method="POST" class="post-form">{% csrf_token %}
+      <!--{{ form.as_p }}-->
+      <p>---세션키 받기전 임시 입력창---
+      <p><label for="manager_id">아이디:</label>
+        <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+      <button type="submit" name="mode" value="select" class="save btn btn-default">입력</button>
+      <p>-----세션키 받으면 제거--------
+  </form>
+<!--촬영공간 추가 -->
+<!-- 행정동, 건물명, 층수, 실내위치 -->
+<p>---------------------------------------------------------------------
+  <p>전체 공간 목록</p>
+  {% for space in space_list %}
+  <div>
+    <p>공간 ID: {{ space.id }}, 행정동: {{ space.dong }}, 건물명: {{ space.building_name}}, 층수: {{ space.flr }}, 실내위치: {{ space.location }} </p>
+  </div>
+  {% endfor %}
+  <p>---------------------------------------------------------------------
+  <p>사용자가 관리하는 CCTV 목록</p>
+  {% for cctv in cctv_list %}
+  <div>
+    <p>ID: {{cctv.id}}, 모델명 : {{cctv.model_name}}, 책임자 : {{ cctv.manager_id }}, 설치날짜 : {{cctv.install_date}} </p>
+  </div>
+  {% endfor %}
+  <p>---------------------------------------------------------------------
+  <p>사용자가 관리하는 CCTV의 촬영 공간 목록</p>
+  {% for shoot_space in shoot_space_list %}
+  <div>
+    <p>CCTV ID: {{shoot_space.id}}, 공간 ID: {{ shoot_space.space_id }}, 행정동: {{ shoot_space.dong }}, 건물명: {{ shoot_space.building_name}}, 층수: {{ shoot_space.flr }}, 실내위치: {{ shoot_space.location }} </p>
+  </div>
+  {% endfor %}
+  <p>---------------------------------------------------------------------
+  <form method="POST" class="post-form">{% csrf_token %}
+      <!--{{ form.as_p }}-->
+      <p>촬영공간 추가</p>
+      <p>---세션키 받기전 임시 입력구간---
+      <p><label for="manager_id">관리자 아이디:</label>
+        <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+      <p>-----세션키 받으면 제거--------
+      <p><label for="cctv_id">촬영할 CCTV ID:</label>
+        <input name="cctv_id" id="cctv_id" type="text" maxlength="20" required></p>
+      <p><label for="shoot_space_id">촬영할 공간 ID:</label>
+        <input name="shoot_space_id" id="shoot_space_id" type="text" maxlength="20" required></p>
+      <button type="submit" name="mode" value="insert" class="save btn btn-default">등록</button>
+  </form>
+  <p>---------------------------------------------------------------------
+  <p>촬영공간 삭제</p>
+  <form method="POST" class="post-form">{% csrf_token %}
+      <p>---세션키 받기전 임시 입력구간---
+      <p><label for="manager_id">관리자 아이디:</label>
+        <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+      <p>-----세션키 받으면 제거--------
+      <p><label for="cctv_id">CCTV ID:</label>
+        <input name="cctv_id" id="cctv_id" type="text" maxlength="20" required /></p>
+      <p><label for="shoot_space_id">촬영공간 ID:</label>
+        <input name="shoot_space_id" id="shoot_space_id" type="text" maxlength="20" required></p>
+      <button type="submit" name="mode" value="delete" class="save btn btn-defalut">삭제</button>
+  </form>
+  <p>---------------------------------------------------------------------
+  <p>촬영공간 수정</p>
+  <form method="POST" class="post-form">{% csrf_token %}
+      <!--{{ form.as_p }}-->
+      <p>---세션키 받기전 임시 입력구간---
+      <p><label for="manager_id">관리자 아이디:</label>
+        <input name="manager_id" id="manager_id" type="text" maxlength="20"/></p>
+      <p>-----세션키 받으면 제거--------
+      <p><label for="cctv_id">촬영중인 CCTV ID:</label>
+        <input name="cctv_id" id="cctv_id" type="text" maxlength="20" required /></p>
+      <p><label for="shoot_space_id">수정할 촬영공간 ID:</label>
+        <input name="shoot_space_id" id="shoot_space_id" type="text" maxlength="20" required></p>
+      <button type="submit" name="mode" value="update" class="save btn btn-default">수정</button>
+  </form>
+  <p>---------------------------------------------------------------------
+
+<!-- 촬영공간 수정/제거 -->
+<!-- 여기에 촬영공간 테이블 만들기 -->
+{% endblock %}
