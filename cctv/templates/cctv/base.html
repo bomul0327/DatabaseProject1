@@ -40,15 +40,18 @@
         </nav>
         </aside>
         <content>
+          <section>
                 {% block content %}
                 {% endblock %}
+          </section>
         </content>
         <style>
           body{}
           article{}
-          header{}
+          header{margin-left: 50px;}
           aside{float:right; width:250px; padding: 0px; height: 100%;}
-          content{margin-left: 250px; padding: 20px;}
+          content{padding: 20px;}
+          section{margin-left: 50px;}
           nav{
             width:200px;
             border-left:1px solid #ddd;
