@@ -30,6 +30,10 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
         [request.user.username])
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s',
                                  [request.user.username])
+    if request.user.username == "admin":
+        shoot_space_list = Shoot_space.objects.raw('SELECT cc.id, ss.id AS space_id , ss.dong, ss.building_name, ss.flr, ss.location FROM cctv_shoot_space AS ss, cctv_shoot AS sh, cctv_cctv AS cc WHERE ss.id = sh.Shoot_space_id_id AND cc.id = sh.CCTV_id_id')
+        cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
+
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] == "insert":
@@ -42,11 +46,13 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
             form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s',
                          [request.POST['cctv_id'], request.POST['space_id']])
             # form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [[request.POST['cctv_id'], request.POST['shoot_space_id']])
-        elif request.method == "POST" and request.POST['mode'] == "update":
+        if request.method == "POST" and request.POST['mode'] == "update":
             cctv_id = request.POST['cctv_id']
-            shoot_space_id = request.POST['shoot_space_id']
-            form.execute("UPDATE cctv_shoot SET shoot_space_id_id = %s WHERE cctv_id_id = %s",
-                         [shoot_space_id, cctv_id])
+            form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s', [cctv_id])
+            for r in request.POST:
+                for space in space_list:
+                    if r==space.id:
+                        form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)",[cctv_id, r])
     return render(request, 'cctv/shoot_space_manage.html',
                   {'space_list': space_list, 'shoot_space_list': shoot_space_list, 'cctv_list': cctv_list})
 
