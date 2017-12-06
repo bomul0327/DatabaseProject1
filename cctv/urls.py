@@ -25,7 +25,7 @@ urlpatterns = [
             'next_page': settings.LOGIN_URL,
         }
     ),
-    url(r'^uploadfile/$', 'upload_file'),
+    url(r'^upload/$', views.create, name='create'),
     
 
 ]

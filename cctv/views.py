@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.http import Http404
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 
 from .models import Document
@@ -34,3 +35,19 @@ def login(request):
 def logout(request):
 
     return render(request, 'cctv/logout.html')
+
+def create(request):
+    if request.method == "GET":
+        form = DocumentForm()
+    elif request.method == "POST":
+        form = DocumentForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            obj = form.save()
+            return redirect(obj)
+
+    form = DocumentForm()
+    ctx ={
+        'form' : form,
+    }
+    return render(request, 'cctv/edit.html', ctx)
