@@ -48,6 +48,7 @@ class Neighborhood(models.Model):
 
 class Sequence(models.Model):
     id = models.CharField(max_length=20, primary_key=True, null=False)
+    last = models.ForeignKey(Neighborhood, related_name='last', null=False)
     connects = models.ManyToManyField(Neighborhood)
 
 class Statistics(models.Model):
