@@ -70,22 +70,20 @@ def log_read(request):
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def my_page(request):
-    if request.method == "POST" and request.POST['mode'] =="select":
-        manager = Manager.objects.raw('SELECT id, pos, phonenum FROM cctv_manager WHERE id = %s', [request.POST['manager_id']])
-        cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.POST['manager_id']])
-        return render(request, 'cctv/my_page.html', {'manager' : manager, 'cctv_list' : cctv_list})
+    manager = Manager.objects.raw('SELECT auth_user.id auth_user.username, manager.pos, manager.phonenum FROM cctv_manager AS manager, auth_user WHERE auth_user.username = %s AND manager.user_id = auth_user.id', [request.user.username])
+    cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.user.username])
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="update" :
             pos = request.POST['pos']
             phonenum = request.POST['phonenum']
             if pos == "" and phonenum != "":
-                form.execute("UPDATE cctv_manager SET phonenum = %s WHERE id = %s", [phonenum, request.POST['manager_id']] )
+                form.execute("UPDATE cctv_manager SET phonenum = %s WHERE id = %s", [phonenum, request.user.username] )
             elif pos != "" and phonenum == "":
-                form.execute("UPDATE cctv_manager SET pos = %s WHERE id = %s", [pos, request.POST['manager_id']] )
+                form.execute("UPDATE cctv_manager SET pos = %s WHERE id = %s", [pos, request.user.username] )
             elif pos != "" and phonenum != "":
-                form.execute("UPDATE cctv_manager SET pos = %s, phonenum = %s WHERE id = %s", [pos, phonenum, request.POST['manager_id']] )
-    return render(request, 'cctv/my_page.html', {'form' : form})
+                form.execute("UPDATE cctv_manager SET pos = %s, phonenum = %s WHERE id = %s", [pos, phonenum, request.user.username] )
+    return render(request, 'cctv/my_page.html', {'manager' : manager, 'cctv_list' : cctv_list})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def manager_manage(request):
