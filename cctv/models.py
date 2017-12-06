@@ -32,7 +32,8 @@ class Shoot (models.Model):
         return self.CCTV_id
 
 class Files(models.Model):
-    file_name =  models.FileField(upload_to='cctvFile')
+    file_name =  models.CharField(max_length=20, primary_key=True, null=False)
+    file = models.FileField(upload_to='cctvFile')
     start_time = models.DateTimeField('start time')
     end_time = models.DateTimeField('end time')
     CCTV_id = models.ForeignKey(CCTV, on_delete=models.CASCADE, null=False)
@@ -66,5 +67,3 @@ class Record(models.Model):
     obj_color = models.CharField(max_length=20)
     file_name = models.ForeignKey(Files, null=False, on_delete=models.DO_NOTHING)
 
-class UploadData(models.Model):
-    file = models.FileField(upload_to='cctvFile')

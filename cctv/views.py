@@ -56,7 +56,9 @@ def file_manage(request):
         if form.is_valid():
             obj = form.save()
             return render(request, 'cctv/file_manage.html')
-    ctx = {'form': form,}
+    files_list = Files.objects.raw(
+        'SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
+    ctx = {'files_list': files_list, 'form': form,}
     return render(request, 'cctv/file_manage.html', ctx)
 
     files_list = Files.objects.raw('SELECT file_name, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')

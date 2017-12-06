@@ -1,7 +1,6 @@
 from django import forms
 #from django.db import connection
 from .models import Manager
-from .models import UploadData
 from .models import Files
 
 class manager_manage_form(forms.ModelForm):
@@ -9,10 +8,6 @@ class manager_manage_form(forms.ModelForm):
         model = Manager
         fields = "__all__"
 
-class UploadDataForm(forms.ModelForm):
-    class Meta:
-        model = UploadData
-        fields = "__all__"
 
 class FilesForm(forms.ModelForm):
     class Meta:
