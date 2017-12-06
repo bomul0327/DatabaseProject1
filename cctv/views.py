@@ -36,16 +36,6 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
 
     with connection.cursor() as form:
         form = connection.cursor()
-        if request.method == "POST" and request.POST['mode'] == "insert":
-            cctv_id = request.POST['cctv_id']
-            # shoot = Shoot.objects.raw('SELECT cctv_id_id FROM cctv_shoot WHERE cctv_id_id = %s', [request.POST['cctv_id']])
-            # if(shoot.___str___ == "") #shoot.___str___이 cctv_id_id 를 리턴하는가 확인. 윗줄과 이거 주석 해제하고 아래 form 한칸 들여쓰기
-            form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)",
-                         [request.POST['cctv_id'], request.POST['space_id']])
-        elif request.method == "POST" and request.POST['mode'] == "delete":
-            form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s',
-                         [request.POST['cctv_id'], request.POST['space_id']])
-            # form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [[request.POST['cctv_id'], request.POST['shoot_space_id']])
         if request.method == "POST" and request.POST['mode'] == "update":
             cctv_id = request.POST['cctv_id']
             form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s', [cctv_id])
@@ -53,8 +43,7 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
                 for space in space_list:
                     if r==space.id:
                         form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)",[cctv_id, r])
-    return render(request, 'cctv/shoot_space_manage.html',
-                  {'space_list': space_list, 'shoot_space_list': shoot_space_list, 'cctv_list': cctv_list})
+    return render(request, 'cctv/shoot_space_manage.html', {'space_list': space_list, 'shoot_space_list': shoot_space_list, 'cctv_list': cctv_list})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 @login_required
