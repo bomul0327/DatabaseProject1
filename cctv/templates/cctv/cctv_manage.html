@@ -11,11 +11,11 @@
 		<option value="{{ model }}"/>{{model}}
 		{% endfor %}
 	  </select>  
-	<p><label for="manager_id">책임자:</label>
+	<p><label for="manager_id">관리자:</label>
       <select name="manager_id" id="manager_id"> 
 		<option selected /> 
 		{% for manager in manager_list %}
-		<option value="{{ manager.id }}"/>{{manager.id}}
+		<option value="{{ manager.id }}"/>{{manager.username}}
 		{% endfor %}
 	  </select>
 	</p>
@@ -42,7 +42,7 @@
       <select name="manager_id" id="manager_id" required>
 		<option selected /> ---
 		{% for manager in manager_list %}
-		<option value="{{ manager.id }}"/>{{manager.id}}
+		<option value="{{ manager.id }}"/>{{manager.username}}
 		{% endfor %}
 	  </select>
 	</p>
