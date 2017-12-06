@@ -25,25 +25,30 @@ def logout(request):
 @login_required
 def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
     space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
-    if request.method == "POST" and request.POST['mode'] =="select":
-        shoot_space_list = Shoot_space.objects.raw('SELECT cc.id, ss.id AS space_id , ss.dong, ss.building_name, ss.flr, ss.location FROM cctv_shoot_space AS ss, cctv_shoot AS sh, cctv_cctv AS cc WHERE ss.id = sh.Shoot_space_id_id AND cc.id = sh.CCTV_id_id AND cc.manager_id = %s', [request.user.username])
-        cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.user.username])
-        return render(request, 'cctv/shoot_space_manage.html', {'space_list' : space_list, 'shoot_space_list' : shoot_space_list, 'cctv_list' : cctv_list})
+    shoot_space_list = Shoot_space.objects.raw(
+        'SELECT cc.id, ss.id AS space_id , ss.dong, ss.building_name, ss.flr, ss.location FROM cctv_shoot_space AS ss, cctv_shoot AS sh, cctv_cctv AS cc WHERE ss.id = sh.Shoot_space_id_id AND cc.id = sh.CCTV_id_id AND cc.manager_id = %s',
+        [request.user.username])
+    cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s',
+                                 [request.user.username])
     with connection.cursor() as form:
         form = connection.cursor()
-        if request.method == "POST" and request.POST['mode'] =="insert" :
-            #문제점 : install_date 타입이 DateTimeField 인데 이게 입력이 잘 안됩니다.
-            #shoot = Shoot.objects.raw('SELECT cctv_id_id FROM cctv_shoot WHERE cctv_id_id = %s', [request.POST['cctv_id']])
-            #if(shoot.___str___ == "") #shoot.___str___이 cctv_id_id 를 리턴하는가 확인. 윗줄과 이거 주석 해제하고 아래 form 한칸 들여쓰기
-            form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)", [request.POST['cctv_id'], request.POST['shoot_space_id']] )
-        elif request.method == "POST" and request.POST['mode'] =="delete" :
-            form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [request.POST['cctv_id'], request.POST['shoot_space_id']])
-            #form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [[request.POST['cctv_id'], request.POST['shoot_space_id']])
-        elif request.method == "POST" and request.POST['mode'] == "update" :
+        if request.method == "POST" and request.POST['mode'] == "insert":
+            cctv_id = request.POST['cctv_id']
+            # shoot = Shoot.objects.raw('SELECT cctv_id_id FROM cctv_shoot WHERE cctv_id_id = %s', [request.POST['cctv_id']])
+            # if(shoot.___str___ == "") #shoot.___str___이 cctv_id_id 를 리턴하는가 확인. 윗줄과 이거 주석 해제하고 아래 form 한칸 들여쓰기
+            form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)",
+                         [request.POST['cctv_id'], request.POST['space_id']])
+        elif request.method == "POST" and request.POST['mode'] == "delete":
+            form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s',
+                         [request.POST['cctv_id'], request.POST['space_id']])
+            # form.execute('DELETE FROM cctv_shoot WHERE cctv_id_id = %s AND shoot_space_id_id = %s', [[request.POST['cctv_id'], request.POST['shoot_space_id']])
+        elif request.method == "POST" and request.POST['mode'] == "update":
             cctv_id = request.POST['cctv_id']
             shoot_space_id = request.POST['shoot_space_id']
-            form.execute("UPDATE cctv_shoot SET shoot_space_id_id = %s WHERE cctv_id_id = %s", [shoot_space_id, cctv_id] )
-    return render(request, 'cctv/shoot_space_manage.html', {'space_list' : space_list })
+            form.execute("UPDATE cctv_shoot SET shoot_space_id_id = %s WHERE cctv_id_id = %s",
+                         [shoot_space_id, cctv_id])
+    return render(request, 'cctv/shoot_space_manage.html',
+                  {'space_list': space_list, 'shoot_space_list': shoot_space_list, 'cctv_list': cctv_list})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 @login_required
@@ -122,32 +127,48 @@ def manager_manage(request):
     if request.user.is_authenticated:
         if not request.user.is_staff == True:
             return shoot_space_manage(request)
-    manager_list = Manager.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id NOT IN ("admin")')
-    if request.method == "POST" and request.POST['mode'] =="select":
-        manager_id = request.POST['manager_id']         # 여기부터
-        if manager_id == "":                            # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
-            manager_id = "%"                            # 여기까지
-        pos = request.POST['pos']                       # 여기부터
-        if pos == "":                                   # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
-            pos = "%"                                   # 여기까지
-        phonenum = request.POST['phonenum']             # 여기부터
-        if phonenum == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
-            phonenum = "%"                              # 여기까지
+    manager_list = Manager.objects.raw(
+        'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username NOT IN ("admin")')
+    cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
+    if request.method == "POST" and request.POST['mode'] == "select":
+        manager_id = request.POST['manager_id']  # 여기부터
+        if manager_id == "":  # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            manager_id = "%"  # 여기까지
+        pos = request.POST['pos']  # 여기부터
+        if pos == "":  # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            pos = "%"  # 여기까지
+        phonenum = request.POST['phonenum']  # 여기부터
+        if phonenum == "":  # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            phonenum = "%"  # 여기까지
         cctv_id = request.POST['cctv_id']
-        if cctv_id == "" and (manager_id == "%" and pos == "%" and phonenum =="%"):  #검색 칸이 전부 빈공간인 경우 전체 검색
-            manager_list = Manager.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id NOT IN ("admin")')
-            return render(request, 'cctv/manager_manage.html', {'manager_list' : manager_list})
-        if cctv_id == "" and not(manager_id == "%" and pos == "%" and phonenum =="%"):  #관리 CCTV ID 칸만 빈칸인 경우 cctv_id 는 조건절에서 제외하고 검색
-            manager_list = Manager.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id like %s AND manager.pos like %s AND manager.phonenum like %s', [manager_id, pos, phonenum])
-            return render(request, 'cctv/manager_manage.html', {'manager_list' : manager_list})
-        manager_list = CCTV.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id like %s AND manager.pos like %s AND manager.phonenum like %s AND cctv.id like %s', [manager_id, pos, phonenum, cctv_id])
+        if cctv_id == "" and (manager_id == "%" and pos == "%" and phonenum == "%"):  # 검색 칸이 전부 빈공간인 경우 전체 검색
+            manager_list = Manager.objects.raw(
+                'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username NOT IN ("admin")')
+            cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
+            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'cctv_list': cctv_list})
+        if cctv_id == "" and not (
+                    manager_id == "%" and pos == "%" and phonenum == "%"):  # 관리 CCTV ID 칸만 빈칸인 경우 cctv_id 는 조건절에서 제외하고 검색
+            manager_list = Manager.objects.raw(
+                'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username like %s AND manager.pos like %s AND manager.phonenum like %s',
+                [manager_id, pos, phonenum])
+            cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
+            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'cctv_list': cctv_list})
+        manager_list = Manager.objects.raw(
+            'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username like %s AND manager.pos like %s AND manager.phonenum like %s AND cctv.id like %s',
+            [manager_id, pos, phonenum, cctv_id])
+        cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
     with connection.cursor() as form:
         form = connection.cursor()
-        if request.method == "POST" and request.POST['mode'] =="insert" :
-            form.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)", [request.POST['insert_id'], request.POST['pw'], request.POST['pos'], request.POST['phonenum']] )
-        elif request.method == "POST" and request.POST['mode'] =="delete" :
-            form.execute('DELETE FROM cctv_manager WHERE id = %s AND id NOT IN ("admin")', [request.POST['delete_id']] )
-    return render(request, 'cctv/manager_manage.html', {'manager_list' : manager_list, 'form': form})
+        if request.method == "POST" and request.POST['mode'] == "insert":
+            form.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)",
+                         [request.POST['insert_id'], request.POST['pw'], request.POST['pos'], request.POST['phonenum']])
+        elif request.method == "POST" and request.POST['mode'] == "delete":
+            form.execute('DELETE FROM cctv_manager WHERE id = %s AND id NOT IN ("admin")', [request.POST['delete_id']])
+        elif request.method == "POST" and request.POST['mode'] == "cctv_insert":
+            form.execute('UPDATE cctv_cctv SET manager_id = %s WHERE id = %s',
+                         [request.POST['manager_id'], request.POST['cctv_id']])
+    return render(request, 'cctv/manager_manage.html',
+                  {'manager_list': manager_list, 'cctv_list': cctv_list, 'form': form})
 
 
 #def insert_sql(self):
