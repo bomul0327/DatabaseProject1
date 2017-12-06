@@ -70,7 +70,7 @@ def log_read(request):
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def my_page(request):
-    manager = Manager.objects.raw('SELECT auth_user.id auth_user.username, manager.pos, manager.phonenum FROM cctv_manager AS manager, auth_user WHERE auth_user.username = %s AND manager.user_id = auth_user.id', [request.user.username])
+    manager = Manager.objects.raw('SELECT auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM cctv_manager AS manager, auth_user WHERE auth_user.username = %s AND manager.user_id = auth_user.id', [request.user.username])
     cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.user.username])
     with connection.cursor() as form:
         form = connection.cursor()
