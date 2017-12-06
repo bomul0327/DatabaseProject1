@@ -170,11 +170,27 @@ def cctv_manage(request):
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def space_manage(request):
     space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
+    neighbor_list = Neighborhood.objects.raw('SELECT id, space_a_id, space_b_id, route FROM cctv_neighborhood')
+    if request.method == "POST" and request.POST['mode'] =="select":
+        dong = request.POST['dong']                       # 여기부터
+        if dong == "":                                   # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            dong = "%"                                   # 여기까지
+        building_name = request.POST['building_name']             # 여기부터
+        if building_name == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            building_name = "%"                              # 여기까지
+        flr = request.POST['flr']             # 여기부터
+        if flr == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            flr = "%"                              # 여기까지
+        location = request.POST['location']             # 여기부터
+        if location == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            location = "%"                              # 여기까지
+        space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space WHERE dong like %s AND building_name like %s AND flr like %s AND location like %s', [dong, building_name, flr, location])
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="insert" :
-            #문제점 : install_date 타입이 DateTimeField 인데 이게 입력이 잘 안됩니다.
             form.execute("INSERT INTO cctv_shoot_space ('id', 'dong', 'building_name', 'flr', 'location') VALUES(%s, %s, %s, %s, %s)", [request.POST['shoot_space_id'], request.POST['dong'], request.POST['building_name'], request.POST['flr'], request.POST['location']] )
         elif request.method == "POST" and request.POST['mode'] =="delete" :
             form.execute('DELETE FROM cctv_shoot_space WHERE id = %s', [request.POST['shoot_space_id']])
-    return render(request, 'cctv/space_manage.html', {'space_list' : space_list})
+        elif request.method == "POST" and request.POST['mode'] == "insertNeighbor":
+            form.execute("INSERT INTO cctv_neighborhood ('id', 'route', 'location', 'space_a_id', 'space_b_id') VALUES(%s, %s, %s, %s, %s)", [request.POST['neighbor_space_id'], request.POST['route'], request.POST['loc'], request.POST['space_a_id'], request.POST['space_b_id']] )
+    return render(request, 'cctv/space_manage.html', {'space_list' : space_list, 'neighbor_list' : neighbor_list})
