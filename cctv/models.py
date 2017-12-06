@@ -24,7 +24,7 @@ class CCTV(models.Model):
     install_date = models.DateField('date installed')
     manager = models.ForeignKey(Manager, on_delete=models.CASCADE, null=False)
     shoots = models.ManyToManyField(Shoot_space, through='Shoot', through_fields=('CCTV_id', 'Shoot_space_id'))
-    
+
 class Shoot (models.Model):
     CCTV_id = models.ForeignKey(CCTV, on_delete=models.CASCADE, null=False)
     Shoot_space_id = models.ForeignKey(Shoot_space, on_delete=models.CASCADE, null=False)
