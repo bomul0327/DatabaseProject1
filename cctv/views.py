@@ -214,11 +214,71 @@ def space_manage(request):
         if not request.user.is_staff == True:
             return shoot_space_manage(request)
     space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
+    neighbor_list = Neighborhood.objects.raw('SELECT id, space_a_id, space_b_id, route FROM cctv_neighborhood')
+    sequences = Sequence.objects.raw('SELECT id FROM cctv_sequence')
+    sequence_list = Sequence.objects.raw('SELECT id, sequence_id, neighborhood_id FROM cctv_sequence_connects')
+
     with connection.cursor() as form:
         form = connection.cursor()
-        if request.method == "POST" and request.POST['mode'] =="insert" :
-            #문제점 : install_date 타입이 DateTimeField 인데 이게 입력이 잘 안됩니다.
-            form.execute("INSERT INTO cctv_shoot_space ('id', 'dong', 'building_name', 'flr', 'location') VALUES(%s, %s, %s, %s, %s)", [request.POST['shoot_space_id'], request.POST['dong'], request.POST['building_name'], request.POST['flr'], request.POST['location']] )
-        elif request.method == "POST" and request.POST['mode'] =="delete" :
+        # shoot_space
+        if request.method == "POST" and request.POST['mode'] == "insert":
+            form.execute(
+                "INSERT INTO cctv_shoot_space ('id', 'dong', 'building_name', 'flr', 'location') VALUES(%s, %s, %s, %s, %s)",
+                [request.POST['shoot_space_id'], request.POST['dong'], request.POST['building_name'],
+                 request.POST['flr'], request.POST['location']])
+        elif request.method == "POST" and request.POST['mode'] == "delete":
+            form.execute(
+                "DELETE FROM cctv_sequence WHERE id IN ( SELECT sequence_id FROM cctv_sequence_connects WHERE neighborhood_id IN ( SELECT id FROM cctv_neighborhood WHERE space_a_id = %s or space_b_id = %s))",
+                [request.POST['shoot_space_id'], request.POST['shoot_space_id']])
+            form.execute(
+                "DELETE FROM cctv_sequence_connects WHERE sequence_id IN ( SELECT sequence_id FROM cctv_sequence_connects WHERE neighborhood_id IN ( SELECT id FROM cctv_neighborhood WHERE space_a_id = %s or space_b_id = %s))",
+                [request.POST['shoot_space_id'], request.POST['shoot_space_id']])
+            form.execute("DELETE FROM cctv_neighborhood WHERE space_a_id = %s or space_b_id = %s",
+                         [request.POST['shoot_space_id'], request.POST['shoot_space_id']])
             form.execute('DELETE FROM cctv_shoot_space WHERE id = %s', [request.POST['shoot_space_id']])
-    return render(request, 'cctv/space_manage.html', {'space_list' : space_list})
+        # neighborhood
+        elif request.method == "POST" and request.POST['mode'] == "insertNeighbor":
+            form.execute(
+                "INSERT INTO cctv_neighborhood ('id', 'route', 'location', 'space_a_id', 'space_b_id') VALUES(%s, %s, %s, %s, %s)",
+                [request.POST['neighbor_space_id'], request.POST['route'], request.POST['loc'],
+                 request.POST['space_a_id'], request.POST['space_b_id']])
+        elif request.method == "POST" and request.POST['mode'] == "deleteNeighbor":
+            form.execute(
+                "DELETE FROM cctv_sequence WHERE id IN ( SELECT sequence_id FROM cctv_sequence_connects WHERE neighborhood_id = %s)",
+                [request.POST['neighbor_id']])
+            form.execute(
+                "DELETE FROM cctv_sequence_connects WHERE sequence_id IN ( SELECT sequence_id FROM cctv_sequence_connects WHERE neighborhood_id = %s)",
+                [request.POST['neighbor_id']])
+            form.execute('DELETE FROM cctv_neighborhood WHERE id = %s', [request.POST['neighbor_id']])
+        elif request.method == "POST" and request.POST['mode'] == "updateNeighbor":
+            form.execute(
+                "UPDATE cctv_neighborhood SET route = %s, location = %s, space_a_id = %s, space_b_id = %s WHERE id = %s",
+                [request.POST['route'], request.POST['loc'], request.POST['space_a_id'], request.POST['space_b_id'],
+                 request.POST['neighbor_space_id']])
+        # sequence
+        elif request.method == "POST" and request.POST['mode'] == "insertSequence":
+            form.execute("INSERT INTO cctv_sequence ('id', 'last_id') VALUES( %s, %s )",
+                         [request.POST['seq_id'], request.POST['neighbor_id']])
+            form.execute("INSERT INTO cctv_sequence_connects ('sequence_id', 'neighborhood_id') VALUES( %s, %s )",
+                         [request.POST['seq_id'], request.POST['neighbor_id']])
+        elif request.method == "POST" and request.POST['mode'] == "updateSequence":
+            for s in sequences:
+                if s.id == request.POST['seq_id']:
+                    temp_last = s.last_id
+            for n in neighbor_list:
+                if n.id == temp_last:
+                    temp_b = n.space_b
+                if n.id == request.POST['neighbor_id']:
+                    temp_a = n.space_a
+            if temp_b == temp_a:
+                form.execute("INSERT INTO cctv_sequence_connects ('sequence_id', 'neighborhood_id') VALUES( %s, %s )",
+                             [request.POST['seq_id'], request.POST['neighbor_id']])
+                form.execute("UPDATE cctv_sequence SET last_id = %s WHERE id = %s",
+                             [request.POST['neighbor_id'], request.POST['seq_id']])
+        elif request.method == "POST" and request.POST['mode'] == "deleteSequence":
+            form.execute("DELETE FROM cctv_sequence WHERE id = %s", [request.POST['seq_id']])
+            form.execute("DELETE FROM cctv_sequence_connects WHERE sequence_id = %s", [request.POST['seq_id']])
+
+    return render(request, 'cctv/space_manage.html',
+                  {'space_list': space_list, 'neighbor_list': neighbor_list, 'sequences': sequences,
+                   'sequence_list': sequence_list})
