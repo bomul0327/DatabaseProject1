@@ -18,6 +18,9 @@ class Shoot_space(models.Model):
     flr = models.CharField(max_length=5)
     location = models.CharField(max_length=20)
 
+    def __str__(self):
+        return self.id
+
 class CCTV(models.Model):
     id = models.CharField(max_length=20, primary_key=True, null=False)
     model_name = models.CharField(max_length=20, null=False)
@@ -25,9 +28,13 @@ class CCTV(models.Model):
     manager = models.ForeignKey(Manager, on_delete=models.CASCADE, null=False)
     shoots = models.ManyToManyField(Shoot_space, through='Shoot', through_fields=('CCTV_id', 'Shoot_space_id'))
 
+    def __str__(self):
+        return self.id
+
 class Shoot (models.Model):
     CCTV_id = models.ForeignKey(CCTV, on_delete=models.CASCADE, null=False)
     Shoot_space_id = models.ForeignKey(Shoot_space, on_delete=models.CASCADE, null=False)
+
     def __str__(self):
         return self.CCTV_id
 
