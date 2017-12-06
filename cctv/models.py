@@ -1,13 +1,15 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import User
 
 # Create your models here.
 
-class Manager(AbstractUser):
-    id = models.CharField(max_length=20, primary_key=True, null=False)
-    pw = models.CharField(max_length=20, null=False)
+class Manager(models.Model):
+    user = models.OneToOneField(User)
     pos = models.CharField(max_length=20)
     phonenum = models.CharField(max_length=13)
+
+    def get_user(self):
+        return AbstractUser.objects.get(pk=self.user_id)
 
 class Shoot_space(models.Model):
     id = models.CharField(max_length=20, primary_key=True, null=False)
