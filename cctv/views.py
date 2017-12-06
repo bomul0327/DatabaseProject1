@@ -50,18 +50,21 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
 def file_manage(request):
     if request.method == "GET":
         form = FilesForm()
-    elif request.method == "POST":
+    elif request.POST['mode'] == "upload" and request.method == "POST":
         form = FilesForm(request.POST, request.FILES)
 
         if form.is_valid():
             obj = form.save()
             return render(request, 'cctv/file_manage.html')
+
+        Files.objects.raw('UPDATE cctv_files SET file_name = file.name')
+        files_list = Files.objects.raw(
+            'SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
+        ctx = {'files_list': files_list, 'form': form,}
+        return render(request, 'cctv/file_manage.html', ctx)
+
     files_list = Files.objects.raw(
         'SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
-    ctx = {'files_list': files_list, 'form': form,}
-    return render(request, 'cctv/file_manage.html', ctx)
-
-    files_list = Files.objects.raw('SELECT file_name, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
     if request.method == "POST" and request.POST['mode'] =="select":
         cctv_id = request.POST['cctv_id']         # 여기부터
         if cctv_id == "":                            # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
@@ -75,7 +78,10 @@ def file_manage(request):
         end_time = request.POST['end_time']             # 여기부터
         if end_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
             end_time = "%"                              # 여기까지
-        files_list = Files.objects.raw('SELECT file_name, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files WHERE CCTV_id_id like %s AND Shoot_space_id_id like %s AND start_time like %s AND end_time like %s', [cctv_id, shoot_space_id, start_time, end_time])
+        files_list = Files.objects.raw('SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files WHERE CCTV_id_id like %s AND Shoot_space_id_id like %s AND start_time like %s AND end_time like %s', [cctv_id, shoot_space_id, start_time, end_time])
+    form = FilesForm(request.POST, request.FILES)
+    ctx = {'files_list': files_list, 'form': form, }
+    return render(request, 'cctv/file_manage.html', ctx)
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="insert" :
