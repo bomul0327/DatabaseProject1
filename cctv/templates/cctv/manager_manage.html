@@ -21,7 +21,13 @@
 	  </select>
 	  </p>
       <p><label for="phonenum">전화번호:</label>
-        <input name="phonenum" id="phonenum" type="text" maxlength="20"/></p>
+      <select name="phonenum" id="phonenum">
+		<option selected />
+		{% for p in pnum_list %}
+		<option value="{{ p }}"/>{{p}}
+		{% endfor %}
+	  </select>
+	  </p>
       <p><label for="cctv_id">관리CCTV ID:</label>
       <select name="cctv_id" id="cctv_id">
 		<option selected />
@@ -37,7 +43,7 @@
   {% for manager in search_list %}
       <p>ID : {{ manager.username }}, 직위 : {{manager.pos}}, 전화번호 : {{manager.phonenum}}, 관리CCTV :
         {% for cctv in cctv_list %}
-          {% if cctv.manager_id == manager.username %}
+          {% if cctv.manager_id == manager.id %}
             {{ cctv.id }},
           {% endif %}
         {% endfor %}
@@ -81,7 +87,7 @@
       <select name="delete_id" id="delete_id" required>
 		<option selected /> ---
 		{% for manager in manager_list %}
-		<option value="{{ manager.username }}"/>{{manager.username}}
+		<option value="{{ manager.id }}"/>{{manager.username}}
 		{% endfor %}
 	  </select></p>
 	  <button type="submit" name="mode" value="delete" class="save btn btn-defalut">삭제</button>
