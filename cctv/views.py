@@ -48,6 +48,11 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 @login_required
 def file_manage(request):
+    cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s',[request.user.username])
+    if request.user.username == "admin":
+        cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
+    space_list = Shoot_space.objects.raw('SELECT id FROM cctv_shoot_space')
+
     if request.method == "GET":
         form = FilesForm()
     elif request.POST['mode'] == "upload" and request.method == "POST":
@@ -60,7 +65,7 @@ def file_manage(request):
         Files.objects.raw('UPDATE cctv_files SET file_name = file.name')
         files_list = Files.objects.raw(
             'SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
-        ctx = {'files_list': files_list, 'form': form,}
+        ctx = {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list, 'form': form,}
         return render(request, 'cctv/file_manage.html', ctx)
 
     files_list = Files.objects.raw(
@@ -80,7 +85,7 @@ def file_manage(request):
             end_time = "%"                              # 여기까지
         files_list = Files.objects.raw('SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files WHERE CCTV_id_id like %s AND Shoot_space_id_id like %s AND start_time like %s AND end_time like %s', [cctv_id, shoot_space_id, start_time, end_time])
     form = FilesForm(request.POST, request.FILES)
-    ctx = {'files_list': files_list, 'form': form, }
+    ctx = {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list, 'form': form, }
     return render(request, 'cctv/file_manage.html', ctx)
     with connection.cursor() as form:
         form = connection.cursor()
@@ -88,7 +93,7 @@ def file_manage(request):
             form.execute("INSERT INTO cctv_files ('file_name', 'start_time', 'end_time', 'CCTV_id_id', 'Shoot_space_id_id') VALUES(%s, %s, %s, %s, %s)", [request.POST['file_name'], request.POST['start_time'], request.POST['end_time'], request.POST['cctv_id'], request.POST['shoot_space_id']] )
             # CCTV_id_id 나 Shoot_space_id_id 에 값이 안들어가는 경우(존재 하지 않는 CCTV ID나 Space ID 입력한 경우) 삭제
             #form.execute("DELETE FROM cctv_files WHERE CCTV_id_id IS NULL OR Shoot_space_id_id IS NULL")
-    return render(request, 'cctv/file_manage.html', {'files_list': files_list})
+    return render(request, 'cctv/file_manage.html', {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list,})
 
 @login_required
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
@@ -100,6 +105,8 @@ def log_read(request):
 def my_page(request):
     manager = Manager.objects.raw('SELECT auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM cctv_manager AS manager, auth_user WHERE auth_user.username = %s AND manager.user_id = auth_user.id', [request.user.username])
     cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.user.username])
+    if request.user.username == "admin":
+        cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="update" :
