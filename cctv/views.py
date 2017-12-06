@@ -1,4 +1,8 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from .forms import FilesForm
+
 from .models import Manager, Shoot_space, CCTV, Shoot, Files, Neighborhood, Sequence, Statistics, Record #DB Table과 HTML을 연결해주는 역할
 #테이블 이름은 cctv_'객체명' , eg: cctv_manager, cctv_shoot_space ...
 from django.db import connection #SQL로 insert into, delete, update를 하기위하여 필요.
@@ -18,11 +22,12 @@ def logout(request):
     #return render(request, 'cctv/login.html', {})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+@login_required
 def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
     space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
     if request.method == "POST" and request.POST['mode'] =="select":
-        shoot_space_list = Shoot_space.objects.raw('SELECT cc.id, ss.id AS space_id , ss.dong, ss.building_name, ss.flr, ss.location FROM cctv_shoot_space AS ss, cctv_shoot AS sh, cctv_cctv AS cc WHERE ss.id = sh.Shoot_space_id_id AND cc.id = sh.CCTV_id_id AND cc.manager_id = %s', [request.POST['manager_id']])
-        cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.POST['manager_id']])
+        shoot_space_list = Shoot_space.objects.raw('SELECT cc.id, ss.id AS space_id , ss.dong, ss.building_name, ss.flr, ss.location FROM cctv_shoot_space AS ss, cctv_shoot AS sh, cctv_cctv AS cc WHERE ss.id = sh.Shoot_space_id_id AND cc.id = sh.CCTV_id_id AND cc.manager_id = %s', [request.user.username])
+        cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.user.username])
         return render(request, 'cctv/shoot_space_manage.html', {'space_list' : space_list, 'shoot_space_list' : shoot_space_list, 'cctv_list' : cctv_list})
     with connection.cursor() as form:
         form = connection.cursor()
@@ -41,7 +46,19 @@ def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
     return render(request, 'cctv/shoot_space_manage.html', {'space_list' : space_list })
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+@login_required
 def file_manage(request):
+    if request.method == "GET":
+        form = FilesForm()
+    elif request.method == "POST":
+        form = FilesForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            obj = form.save()
+            return render(request, 'cctv/file_manage.html')
+    ctx = {'form': form,}
+    return render(request, 'cctv/file_manage.html', ctx)
+
     files_list = Files.objects.raw('SELECT file_name, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
     if request.method == "POST" and request.POST['mode'] =="select":
         cctv_id = request.POST['cctv_id']         # 여기부터
@@ -65,11 +82,13 @@ def file_manage(request):
             #form.execute("DELETE FROM cctv_files WHERE CCTV_id_id IS NULL OR Shoot_space_id_id IS NULL")
     return render(request, 'cctv/file_manage.html', {'files_list': files_list})
 
+@login_required
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def log_read(request):
     return render(request, 'cctv/log_read.html', {})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+@login_required
 def my_page(request):
     if request.method == "POST" and request.POST['mode'] =="select":
         manager = Manager.objects.raw('SELECT id, pos, phonenum FROM cctv_manager WHERE id = %s', [request.POST['manager_id']])
@@ -89,7 +108,12 @@ def my_page(request):
     return render(request, 'cctv/my_page.html', {'form' : form})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+@login_required
+#최고관리자
 def manager_manage(request):
+    if request.user.is_authenticated:
+        if not request.user.is_staff == True:
+            return shoot_space_manage(request)
     manager_list = Manager.objects.raw('SELECT distinct manager.id, manager.pos, manager.phonenum FROM cctv_manager AS manager LEFT OUTER JOIN cctv_cctv AS cctv ON manager.id = cctv.manager_id WHERE manager.id NOT IN ("admin")')
     if request.method == "POST" and request.POST['mode'] =="select":
         manager_id = request.POST['manager_id']         # 여기부터
@@ -125,11 +149,13 @@ def manager_manage(request):
 #    return row
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+@login_required
 def post_new(request):
     form = manager_manage_form()
     return render(request, 'cctv/post_edit.html', {'form': form})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+@login_required
 def post_edit(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":
@@ -145,7 +171,12 @@ def post_edit(request, pk):
     return render(request, 'blog/post_edit.html', {'form': form})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+#최고관리자
+@login_required
 def cctv_manage(request):
+    if request.user.is_authenticated:
+        if not request.user.is_staff == True:
+            return shoot_space_manage(request)
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
     if request.method == "POST" and request.POST['mode'] =="select":
         model_name = request.POST['model_name'] # 여기부터
@@ -168,7 +199,12 @@ def cctv_manage(request):
     return render(request, 'cctv/cctv_manage.html', {'cctv_list' : cctv_list, 'form': form})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+#최고관리자
+@login_required
 def space_manage(request):
+    if request.user.is_authenticated:
+        if not request.user.is_staff == True:
+            return shoot_space_manage(request)
     space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
     with connection.cursor() as form:
         form = connection.cursor()

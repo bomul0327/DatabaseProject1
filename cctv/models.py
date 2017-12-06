@@ -9,7 +9,7 @@ class Manager(models.Model):
     phonenum = models.CharField(max_length=13)
 
     def get_user(self):
-        return AbstractUser.objects.get(pk=self.user_id)
+        return User.objects.get(pk=self.user_id)
 
 class Shoot_space(models.Model):
     id = models.CharField(max_length=20, primary_key=True, null=False)
@@ -30,8 +30,9 @@ class Shoot (models.Model):
     Shoot_space_id = models.ForeignKey(Shoot_space, on_delete=models.CASCADE, null=False)
     def __str__(self):
         return self.CCTV_id
+
 class Files(models.Model):
-    file_name =  models.CharField(max_length=20, primary_key=True, null=False)
+    file_name =  models.FileField(upload_to='cctvFile')
     start_time = models.DateTimeField('start time')
     end_time = models.DateTimeField('end time')
     CCTV_id = models.ForeignKey(CCTV, on_delete=models.CASCADE, null=False)
@@ -64,3 +65,6 @@ class Record(models.Model):
     obj_speed = models.IntegerField
     obj_color = models.CharField(max_length=20)
     file_name = models.ForeignKey(Files, null=False, on_delete=models.DO_NOTHING)
+
+class UploadData(models.Model):
+    file = models.FileField(upload_to='cctvFile')

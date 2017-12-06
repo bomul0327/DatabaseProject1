@@ -28,8 +28,10 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', '.pythonanywhere.com']
 
 LOGIN_URL = '/login'
-LOGIN_REDIRECT_URL = '/manager_manage'
+LOGIN_REDIRECT_URL = '/shoot_space_manage'
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 # Application definition
 
 INSTALLED_APPS = [
