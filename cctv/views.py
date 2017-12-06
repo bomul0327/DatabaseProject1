@@ -186,6 +186,12 @@ def cctv_manage(request):
         if not request.user.is_staff == True:
             return shoot_space_manage(request)
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
+    manager_list = Manager.objects.raw('SELECT id FROM cctv_manager')
+    model_list = []
+    for c in cctv_list:
+        if c.model_name not in model_list:
+            model_list.append(c.model_name)
+    search_list = []
     if request.method == "POST" and request.POST['mode'] =="select":
         model_name = request.POST['model_name'] # 여기부터
         if model_name == "":                    # model_name에 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
@@ -196,15 +202,15 @@ def cctv_manage(request):
         install_date = request.POST['install_date'] # 여기부터
         if install_date == "":                    # install_date에 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
             install_date = "%"                    # 여기까지
-        cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE model_name like %s AND manager_id like %s AND install_date like %s', [model_name, manager_id, install_date])
+        search_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE model_name like %s AND manager_id like %s AND install_date like %s', [model_name, manager_id, install_date])
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] =="insert" :
             #문제점 : install_date 타입이 DateTimeField 인데 이게 입력이 잘 안됩니다.
             form.execute("INSERT INTO cctv_cctv ('id', 'model_name', 'manager_id', 'install_date') VALUES(%s, %s, %s, %s)", [request.POST['insert_id'], request.POST['model_name'], request.POST['manager_id'], request.POST['install_date']] )
-        elif request.method == "POST" and request.POST['mode'] =="delete" :
+        elif request.method == "POST" and request.POST['mode'] == "delete" :
             form.execute('DELETE FROM cctv_cctv WHERE id = %s', [request.POST['delete_id']])
-    return render(request, 'cctv/cctv_manage.html', {'cctv_list' : cctv_list, 'form': form})
+    return render(request, 'cctv/cctv_manage.html', {'cctv_list' : cctv_list, 'manager_list' : manager_list, 'model_list' : model_list,'search_list' : search_list, 'form': form})
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 #최고관리자
