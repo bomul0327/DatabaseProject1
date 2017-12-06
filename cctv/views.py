@@ -127,9 +127,14 @@ def manager_manage(request):
     if request.user.is_authenticated:
         if not request.user.is_staff == True:
             return shoot_space_manage(request)
-    manager_list = Manager.objects.raw(
-        'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username NOT IN ("admin")')
+    manager_list = Manager.objects.raw('SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username NOT IN ("admin")')
     cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
+    search_list = manager_list
+    pos_list = []
+    for m in manager_list:
+        if m.pos not in pos_list:
+            pos_list.append(m.pos)
+
     if request.method == "POST" and request.POST['mode'] == "select":
         manager_id = request.POST['manager_id']  # 여기부터
         if manager_id == "":  # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
@@ -142,21 +147,17 @@ def manager_manage(request):
             phonenum = "%"  # 여기까지
         cctv_id = request.POST['cctv_id']
         if cctv_id == "" and (manager_id == "%" and pos == "%" and phonenum == "%"):  # 검색 칸이 전부 빈공간인 경우 전체 검색
-            manager_list = Manager.objects.raw(
+            search_list = Manager.objects.raw(
                 'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username NOT IN ("admin")')
-            cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
-            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'cctv_list': cctv_list})
+            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'pos_list' : pos_list, 'search_list' : search_list, 'cctv_list': cctv_list})
         if cctv_id == "" and not (
                     manager_id == "%" and pos == "%" and phonenum == "%"):  # 관리 CCTV ID 칸만 빈칸인 경우 cctv_id 는 조건절에서 제외하고 검색
-            manager_list = Manager.objects.raw(
+            search_list = Manager.objects.raw(
                 'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username like %s AND manager.pos like %s AND manager.phonenum like %s',
                 [manager_id, pos, phonenum])
-            cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
-            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'cctv_list': cctv_list})
-        manager_list = Manager.objects.raw(
-            'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username like %s AND manager.pos like %s AND manager.phonenum like %s AND cctv.id like %s',
+            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'pos_list' : pos_list, 'search_list' : search_list, 'cctv_list': cctv_list})
+        search_list = Manager.objects.raw('SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username like %s AND manager.pos like %s AND manager.phonenum like %s AND cctv.id like %s',
             [manager_id, pos, phonenum, cctv_id])
-        cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] == "insert":
@@ -168,7 +169,7 @@ def manager_manage(request):
             form.execute('UPDATE cctv_cctv SET manager_id = %s WHERE id = %s',
                          [request.POST['manager_id'], request.POST['cctv_id']])
     return render(request, 'cctv/manager_manage.html',
-                  {'manager_list': manager_list, 'cctv_list': cctv_list, 'form': form})
+                  {'manager_list': manager_list, 'pos_list' : pos_list, 'search_list' : search_list, 'cctv_list': cctv_list, 'form': form})
 
 
 #def insert_sql(self):
@@ -207,12 +208,13 @@ def cctv_manage(request):
         if not request.user.is_staff == True:
             return shoot_space_manage(request)
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
-    manager_list = Manager.objects.raw('SELECT id FROM cctv_manager')
+    manager_list = Manager.objects.raw(
+        'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username NOT IN ("admin")')
     model_list = []
     for c in cctv_list:
         if c.model_name not in model_list:
             model_list.append(c.model_name)
-    search_list = []
+    search_list = cctv_list
     if request.method == "POST" and request.POST['mode'] =="select":
         model_name = request.POST['model_name'] # 여기부터
         if model_name == "":                    # model_name에 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
