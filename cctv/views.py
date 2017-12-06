@@ -167,7 +167,8 @@ def manager_manage(request):
             form.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)",
                          [request.POST['insert_id'], request.POST['pw'], request.POST['pos'], request.POST['phonenum']])
         elif request.method == "POST" and request.POST['mode'] == "delete":
-            form.execute('DELETE FROM cctv_manager WHERE id = %s AND id NOT IN ("admin")', [request.POST['delete_id']])
+            form.execute('DELETE FROM cctv_manager WHERE user_id = %s AND id NOT IN ("admin")', [request.POST['delete_id']])
+            form.execute('DELETE FROM auth_user where id = %s AND id NOT IN ("admin")', [request.POST['delete_id']])
         elif request.method == "POST" and request.POST['mode'] == "cctv_insert":
             form.execute('UPDATE cctv_cctv SET manager_id = %s WHERE id = %s',
                          [request.POST['manager_id'], request.POST['cctv_id']])
