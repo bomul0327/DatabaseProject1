@@ -131,9 +131,12 @@ def manager_manage(request):
     cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
     search_list = manager_list
     pos_list = []
+    pnum_list = []
     for m in manager_list:
         if m.pos not in pos_list:
             pos_list.append(m.pos)
+        if m.phonenum not in pnum_list:
+            pnum_list.append(m.phonenum)
 
     if request.method == "POST" and request.POST['mode'] == "select":
         manager_id = request.POST['manager_id']  # 여기부터
@@ -149,13 +152,13 @@ def manager_manage(request):
         if cctv_id == "" and (manager_id == "%" and pos == "%" and phonenum == "%"):  # 검색 칸이 전부 빈공간인 경우 전체 검색
             search_list = Manager.objects.raw(
                 'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username NOT IN ("admin")')
-            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'pos_list' : pos_list, 'search_list' : search_list, 'cctv_list': cctv_list})
+            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'pos_list' : pos_list, 'pnum_list' : pnum_list, 'search_list' : search_list, 'cctv_list': cctv_list})
         if cctv_id == "" and not (
                     manager_id == "%" and pos == "%" and phonenum == "%"):  # 관리 CCTV ID 칸만 빈칸인 경우 cctv_id 는 조건절에서 제외하고 검색
             search_list = Manager.objects.raw(
                 'SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username like %s AND manager.pos like %s AND manager.phonenum like %s',
                 [manager_id, pos, phonenum])
-            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'pos_list' : pos_list, 'search_list' : search_list, 'cctv_list': cctv_list})
+            return render(request, 'cctv/manager_manage.html', {'manager_list': manager_list, 'pos_list' : pos_list, 'pnum_list' : pnum_list, 'search_list' : search_list, 'cctv_list': cctv_list})
         search_list = Manager.objects.raw('SELECT distinct auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM auth_user LEFT OUTER JOIN cctv_cctv AS cctv ON auth_user.username = cctv.manager_id , cctv_manager AS manager WHERE auth_user.id = manager.user_id AND auth_user.username like %s AND manager.pos like %s AND manager.phonenum like %s AND cctv.id like %s',
             [manager_id, pos, phonenum, cctv_id])
     with connection.cursor() as form:
@@ -169,7 +172,7 @@ def manager_manage(request):
             form.execute('UPDATE cctv_cctv SET manager_id = %s WHERE id = %s',
                          [request.POST['manager_id'], request.POST['cctv_id']])
     return render(request, 'cctv/manager_manage.html',
-                  {'manager_list': manager_list, 'pos_list' : pos_list, 'search_list' : search_list, 'cctv_list': cctv_list, 'form': form})
+                  {'manager_list': manager_list, 'pos_list' : pos_list, 'pnum_list' : pnum_list, 'search_list' : search_list, 'cctv_list': cctv_list, 'form': form})
 
 
 #def insert_sql(self):
