@@ -55,7 +55,6 @@ def shoot_space_manage(request):
                         form.execute("INSERT INTO cctv_shoot ('cctv_id_id', 'shoot_space_id_id') VALUES(%s, %s)",[cctv_id, r])
     return render(request, 'cctv/shoot_space_manage.html', {'space_list': space_list, 'shoot_space_list': shoot_space_list, 'cctv_list': cctv_list})
 
-#여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 @login_required
 def file_manage(request):
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s',[request.user.username])
@@ -63,47 +62,27 @@ def file_manage(request):
         cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
     space_list = Shoot_space.objects.raw('SELECT id FROM cctv_shoot_space')
 
-    if request.method == "GET":
-        form = FilesForm()
-    elif request.POST['mode'] == "upload" and request.method == "POST":
-        form = FilesForm(request.POST, request.FILES)
+    if request.method =="POST" and request.POST['mode'] == "upload":
+        movie=request.FILES['movie_file']
+        log=request.FILES['csv_file']
+        s = request.POST['shoot_space_id']
+        t = ""
+        for c in request.POST['start_time']:
+            if c >= '0' and c <= '9':
+                t+=c
+        movie_name = request.POST['cctv_id'] + '_' + s + '_' + t +'.mp4'
+        log_name = request.POST['cctv_id'] + '_' + s + '_' + t +'.csv'
 
-        if form.is_valid():
-            obj = form.save()
-            return render(request, 'cctv/file_manage.html')
+        with connection.cursor() as form:
+            form = connection.cursor()
+            form.execute("INSERT INTO cctv_files ( 'file_name', 'start_time', 'end_time', 'cctv_id_id', 'shoot_space_id_id') VALUES( %s, %s, %s, %s, %s)",
+                         [movie_name, request.POST['start_time'], request.POST['end_time'],request.POST['cctv_id'], request.POST['shoot_space_id'] ])
+            form.execute("INSERT INTO cctv_files ( 'file_name', 'start_time', 'end_time', 'cctv_id_id', 'shoot_space_id_id') VALUES( %s, %s, %s, %s, %s)",
+                         [log_name, request.POST['start_time'], request.POST['end_time'], request.POST['cctv_id'],request.POST['shoot_space_id']])
 
-        Files.objects.raw('UPDATE cctv_files SET file_name = file.name')
-        files_list = Files.objects.raw(
-            'SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
-        ctx = {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list, 'form': form,}
-        return render(request, 'cctv/file_manage.html', ctx)
-
-    files_list = Files.objects.raw(
-        'SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
-    if request.method == "POST" and request.POST['mode'] =="select":
-        cctv_id = request.POST['cctv_id']         # 여기부터
-        if cctv_id == "":                            # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
-            cctv_id = "%"                            # 여기까지
-        shoot_space_id = request.POST['shoot_space_id']                       # 여기부터
-        if shoot_space_id == "":                                   # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
-            shoot_space_id = "%"                                   # 여기까지
-        start_time = request.POST['start_time']             # 여기부터
-        if start_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
-            start_time = "%"                              # 여기까지
-        end_time = request.POST['end_time']             # 여기부터
-        if end_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
-            end_time = "%"                              # 여기까지
-        files_list = Files.objects.raw('SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files WHERE CCTV_id_id like %s AND Shoot_space_id_id like %s AND start_time like %s AND end_time like %s', [cctv_id, shoot_space_id, start_time, end_time])
-    form = FilesForm(request.POST, request.FILES)
-    ctx = {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list, 'form': form, }
-    return render(request, 'cctv/file_manage.html', ctx)
-    with connection.cursor() as form:
-        form = connection.cursor()
-        if request.method == "POST" and request.POST['mode'] =="insert" :
-            form.execute("INSERT INTO cctv_files ('file_name', 'start_time', 'end_time', 'CCTV_id_id', 'Shoot_space_id_id') VALUES(%s, %s, %s, %s, %s)", [request.POST['file_name'], request.POST['start_time'], request.POST['end_time'], request.POST['cctv_id'], request.POST['shoot_space_id']] )
-            # CCTV_id_id 나 Shoot_space_id_id 에 값이 안들어가는 경우(존재 하지 않는 CCTV ID나 Space ID 입력한 경우) 삭제
-            #form.execute("DELETE FROM cctv_files WHERE CCTV_id_id IS NULL OR Shoot_space_id_id IS NULL")
-    return render(request, 'cctv/file_manage.html', {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list,})
+        path = default_storage.save(s+'/'+movie_name,ContentFile(movie.read()))
+        path = default_storage.save(s+'/'+log_name,ContentFile(log.read()))
+    return render(request, 'cctv/file_manage.html', {'space_list': space_list, 'cctv_list': cctv_list})
 
 @login_required
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
