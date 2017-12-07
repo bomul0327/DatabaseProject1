@@ -43,14 +43,14 @@
   {% for manager in search_list %}
       <p>ID : {{ manager.username }}, 직위 : {{manager.pos}}, 전화번호 : {{manager.phonenum}}, 관리CCTV :
         {% for cctv in cctv_list %}
-          {% if cctv.manager_id == manager.id %}
+          {% if cctv.manager_id == manager.username %}
             {{ cctv.id }},
           {% endif %}
         {% endfor %}
       </p>
   {% endfor %}
   <p>---------------------------------------------------------------------
-  <p>CCTV 관리자 수정</p>
+  <p>CCTV 관리자 임명</p>
   <form method="POST" class="post-form">{% csrf_token %}
   <p>관리자 ID: <select name="manager_id" id="manager_id" required>
       <option selected /> ---
@@ -64,10 +64,10 @@
       <option value="{{ cctv.id }}"/>{{cctv.id}}
       {% endfor %}
   </select></p>
-  <button type="submit" name="mode" value="cctv_insert" class="save btn btn-default">수정</button>
+  <button type="submit" name="mode" value="cctv_insert" class="save btn btn-default">임명</button>
   </form>
   <p>---------------------------------------------------------------------
-  <p>관리자 추가(사용안함)</p>
+  <p>관리자 추가</p>
   <form method="POST" class="post-form">{% csrf_token %}
       <!--{{ form.as_p }}-->
       <p><label for="insert_id">아이디:</label>

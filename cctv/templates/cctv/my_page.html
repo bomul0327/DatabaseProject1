@@ -25,6 +25,11 @@
       <input name="phonenum" id="phonenum" type="text" maxlength="20"/></p>
     <button type="submit" name="mode" value="update" class="save btn btn-default">수정</button>
 </form>
+<form method="POST" class="post-form">{% csrf_token %}
+	<p><label for="pw">비밀번호 변경:</label>
+      <input name="pw" id="pw" type="password" maxlength="20"/></p>
+	  <button type="submit" name="mode" value="change_password" class="save btn btn-default">변경</button>
+</form>
 <p>---------------------------------------------------------------------
 
 {% endblock %}

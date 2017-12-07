@@ -1,5 +1,9 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.models import User
 from django.conf import settings
 from .forms import FilesForm
 import os
@@ -12,19 +16,24 @@ from django.http import HttpResponse
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 def login(request):
-    request.session['login_sess'] = 'cctv'
-    return render(request, 'cctv/login.html', {})
-    #return HttpResponse('[%s] logged in successfully' % request.session['login_sess'])
+    if request.method == "POST" and request.POST['mode'] == "login":
+        user = authenticate(username=request.POST['insert_id'], password=request.POST['pw'])
+        if user:
+            auth_login(request,user)
+            return HttpResponseRedirect('/shoot_space_manage')
 
-#여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
+    return render(request, 'cctv/login.html', {})
+
+
 def logout(request):
     del request.session['login_sess']
     return HttpResponse('logged out successfully')
     #return render(request, 'cctv/login.html', {})
 
+
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 @login_required
-def shoot_space_manage(request): #여기 작성중 12-05 오후 12:20
+def shoot_space_manage(request):
     space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
     shoot_space_list = Shoot_space.objects.raw(
         'SELECT cc.id, ss.id AS space_id , ss.dong, ss.building_name, ss.flr, ss.location FROM cctv_shoot_space AS ss, cctv_shoot AS sh, cctv_cctv AS cc WHERE ss.id = sh.Shoot_space_id_id AND cc.id = sh.CCTV_id_id AND cc.manager_id = %s',
@@ -114,11 +123,15 @@ def my_page(request):
             pos = request.POST['pos']
             phonenum = request.POST['phonenum']
             if pos == "" and phonenum != "":
-                form.execute("UPDATE cctv_manager SET phonenum = %s WHERE id = %s", [phonenum, request.user.username] )
+                form.execute("UPDATE cctv_manager SET phonenum = %s WHERE user_id = %s", [phonenum, request.user.id] )
             elif pos != "" and phonenum == "":
-                form.execute("UPDATE cctv_manager SET pos = %s WHERE id = %s", [pos, request.user.username] )
+                form.execute("UPDATE cctv_manager SET pos = %s WHERE user_id = %s", [pos, request.user.id] )
             elif pos != "" and phonenum != "":
-                form.execute("UPDATE cctv_manager SET pos = %s, phonenum = %s WHERE id = %s", [pos, phonenum, request.user.username] )
+                form.execute("UPDATE cctv_manager SET pos = %s, phonenum = %s WHERE user_id = %s", [pos, phonenum, request.user.id] )
+        if request.method == "POST" and request.POST['mode'] =="change_password" :
+            usr = User.objects.get(username=request.user.username)
+            usr.set_password(request.POST['pw'])
+            usr.save()
     return render(request, 'cctv/my_page.html', {'manager' : manager, 'cctv_list' : cctv_list})
 
 
@@ -166,8 +179,10 @@ def manager_manage(request):
     with connection.cursor() as form:
         form = connection.cursor()
         if request.method == "POST" and request.POST['mode'] == "insert":
-            form.execute("INSERT INTO cctv_manager ('id', 'pw', 'pos', 'phonenum') VALUES(%s, %s, %s, %s)",
-                         [request.POST['insert_id'], request.POST['pw'], request.POST['pos'], request.POST['phonenum']])
+            temp_user = User.objects.create_user(username=request.POST['insert_id'],password=request.POST['pw'],email="a@b.com")
+            print(request.POST['pw'])
+            form.execute("INSERT INTO cctv_manager ('user_id', 'pos', 'phonenum') VALUES(%s, %s, %s)",
+                         [temp_user.pk, request.POST['pos'], request.POST['phonenum']])
         elif request.method == "POST" and request.POST['mode'] == "delete":
             form.execute('DELETE FROM cctv_manager WHERE user_id = %s AND id NOT IN ("admin")', [request.POST['delete_id']])
             form.execute('DELETE FROM auth_user where id = %s AND id NOT IN ("admin")', [request.POST['delete_id']])
@@ -208,7 +223,6 @@ def post_edit(request, pk):
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 #최고관리자
-@login_required
 def cctv_manage(request):
     if request.user.is_authenticated:
         if not request.user.is_staff == True:
