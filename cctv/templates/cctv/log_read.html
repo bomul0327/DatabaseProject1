@@ -53,8 +53,8 @@
 <p>파일 목록</p>
 {% for files in files_list %}
 <div>
-  <p>파일명 : {{ files.file }}, CCTV ID : {{files.CCTV_id_id}}, 촬영공간 : (행정동: {{files.dong}}, 건물명: {{files.building_name}}, 층수: {{files.flr}}, 실내위치: {{files.location}}), 시작시간: {{files.start_time}}, 끝시간: {{files.end_time}} </p>
-	<a href={{files.file}}>Download</a>
+  <p>파일명 : {{ files.file_name }}, CCTV ID : {{files.CCTV_id_id}}, 촬영공간 : (행정동: {{files.dong}}, 건물명: {{files.building_name}}, 층수: {{files.flr}}, 실내위치: {{files.location}}), 시작시간: {{files.start_time}}, 끝시간: {{files.end_time}} </p>
+	<a href={{files.file_name}}>Download</a>
 </div>
 {% endfor %}
 <p>---------------------------------------------------------------------
