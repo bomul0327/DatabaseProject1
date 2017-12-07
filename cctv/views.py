@@ -6,6 +6,8 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User
 from django.conf import settings
 from .forms import FilesForm
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 import os
 
 from .models import Manager, Shoot_space, CCTV, Shoot, Files, Neighborhood, Sequence, Statistics, Record #DB Table과 HTML을 연결해주는 역할
