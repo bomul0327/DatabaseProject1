@@ -107,7 +107,7 @@ def file_manage(request):
 
 @login_required
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
-def log_read(request):def log_read(request):
+def log_read(request):
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s',[request.user.username])
     if request.user.is_staff == True:
         cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
@@ -129,7 +129,7 @@ def log_read(request):def log_read(request):
 #        return render(request, 'cctv/file_manage.html', ctx)
 
     files_list = Files.objects.raw(
-        'SELECT files.file_name, files.file, files.CCTV_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id')
+        'SELECT files.file_name, files.file, files.CCTV_id_id, files.Shoot_space_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id')
     if request.method == "POST" and request.POST['mode'] =="select":
         cctv_id = request.POST['cctv_id']         # 여기부터
         if cctv_id == "":                            # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
@@ -152,7 +152,18 @@ def log_read(request):def log_read(request):
         end_time = request.POST['end_time']             # 여기부터
         if end_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
             end_time = "%"                              # 여기까지
-        files_list = Files.objects.raw('SELECT files.file_name, files.file, files.CCTV_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id AND files.CCTV_id_id like %s AND files.Shoot_space_id_id IN (SELECT id FROM cctv_shoot_space WHERE dong like %s AND building_name like %s AND flr like %s AND location like %s) AND files.start_time like %s AND files.end_time like %s', [cctv_id, dong, building_name, flr, location, start_time, end_time])
+        #시작시간만 빈칸인경우
+        if start_time == "%" and end_time != "%":
+            files_list = Files.objects.raw('SELECT files.file_name, files.file, files.CCTV_id_id, files.Shoot_space_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id AND files.CCTV_id_id like %s AND files.Shoot_space_id_id IN (SELECT id FROM cctv_shoot_space WHERE dong like %s AND building_name like %s AND flr like %s AND location like %s) AND files.end_time <= datetime(%s)', [cctv_id, dong, building_name, flr, location, end_time])
+        #끝시간만 빈칸인경우
+        if start_time != "%" and end_time == "%":
+            files_list = Files.objects.raw('SELECT files.file_name, files.file, files.CCTV_id_id, files.Shoot_space_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id AND files.CCTV_id_id like %s AND files.Shoot_space_id_id IN (SELECT id FROM cctv_shoot_space WHERE dong like %s AND building_name like %s AND flr like %s AND location like %s) AND files.start_time >= datetime(%s', [cctv_id, dong, building_name, flr, location, start_time])
+        #시작시간, 끝시간 모두 빈칸인 경우
+        if start_time == "%" and end_time == "%":
+            files_list = Files.objects.raw('SELECT files.file_name, files.file, files.CCTV_id_id, files.Shoot_space_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id AND files.CCTV_id_id like %s AND files.Shoot_space_id_id IN (SELECT id FROM cctv_shoot_space WHERE dong like %s AND building_name like %s AND flr like %s AND location like %s)', [cctv_id, dong, building_name, flr, location])
+        #시간시간, 끝시간 모두 입력한 경우
+        if start_time != "%" and end_time != "%":
+            files_list = Files.objects.raw('SELECT files.file_name, files.file, files.CCTV_id_id, files.Shoot_space_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id AND files.CCTV_id_id like %s AND files.Shoot_space_id_id IN (SELECT id FROM cctv_shoot_space WHERE dong like %s AND building_name like %s AND flr like %s AND location like %s) AND files.start_time >= datetime(%s) AND files.end_time <= datetime(%s)', [cctv_id, dong, building_name, flr, location, start_time, end_time])
     form = FilesForm(request.POST, request.FILES)
     ctx = {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list, 'form': form, }
     return render(request, 'cctv/log_read.html', ctx)
