@@ -1,7 +1,61 @@
 {% extends 'cctv/base.html' %}
 {% block content %}
-<p>로그 열람 페이지</p>
-
-
-
+<p>파일검색 페이지</p>
+<p>---------------------------------------------------------------------
+<p>파일 검색</p>
+<form method="POST" class="post-form">{% csrf_token %}
+    <!--{{ form.as_p }}-->
+    <p><label for="cctv_id">CCTV ID:</label>
+	  <select name="cctv_id" id="cctv_id">
+		<option selected />
+		{% for cctv in cctv_list %}
+		<option value="{{ cctv.id }}"/>{{cctv.id}}
+		{% endfor %}
+	  </select>
+	</p>
+    <p><label for="shoot_space_id">촬영공간:( </label>
+    <label for="dong">행정동:</label>
+      <select name="dong" id="dong">
+		<option selected />
+		{% for space in space_list %}
+		<option value="{{ space.dong }}"/>{{space.dong}}
+		{% endfor %}
+	  </select>
+    <label for="building_name">건물이름:</label>
+      <select name="building_name" id="building_name">
+		<option selected />
+		{% for space in space_list %}
+		<option value="{{ space.building_name }}"/>{{space.building_name}}
+		{% endfor %}
+	  </select>
+    <label for="flr">층수:</label>
+      <select name="flr" id="flr">
+		<option selected />
+		{% for space in space_list %}
+		<option value="{{ space.flr }}"/>{{space.flr}}
+		{% endfor %}
+	  </select>
+    <label for="location">실내위치:</label>
+      <select name="location" id="location">
+		<option selected />
+		{% for space in space_list %}
+		<option value="{{ space.location }}"/>{{space.location}}
+		{% endfor %}
+      </select> )
+	</p>
+	<p><label for="start_time">시작 시간:</label>
+      <input name="start_time" id="start_time" type="datetime-local"/></p>
+    <p><label for="end_time">끝 시간:</label>
+      <input name="end_time" id="end_time" type="datetime-local"/></p>
+    <button type="submit" name="mode" value="select" class="save btn btn-default">검색</button>
+</form>
+<p>---------------------------------------------------------------------
+<p>파일 목록</p>
+{% for files in files_list %}
+<div>
+  <p>파일명 : {{ files.file }}, CCTV ID : {{files.CCTV_id_id}}, 촬영공간 : (행정동: {{files.dong}}, 건물명: {{files.building_name}}, 층수: {{files.flr}}, 실내위치: {{files.location}}), 시작시간: {{files.start_time}}, 끝시간: {{files.end_time}} </p>
+	<a href={{files.file}}>Download</a>
+</div>
+{% endfor %}
+<p>---------------------------------------------------------------------
 {% endblock %}
