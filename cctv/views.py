@@ -107,8 +107,56 @@ def file_manage(request):
 
 @login_required
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
-def log_read(request):
-    return render(request, 'cctv/log_read.html', {})
+def log_read(request):def log_read(request):
+    cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s',[request.user.username])
+    if request.user.is_staff == True:
+        cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
+    space_list = Shoot_space.objects.raw('SELECT id, dong, building_name, flr, location FROM cctv_shoot_space')
+#파일 업로드 부분 주석처리
+#    if request.method == "GET":
+#        form = FilesForm()
+#    elif request.POST['mode'] == "upload" and request.method == "POST":
+#        form = FilesForm(request.POST, request.FILES)
+#
+#        if form.is_valid():
+#            obj = form.save()
+#            return render(request, 'cctv/file_manage.html')
+#
+#        Files.objects.raw('UPDATE cctv_files SET file_name = file.name')
+#        files_list = Files.objects.raw(
+#            'SELECT file_name, file, CCTV_id_id, Shoot_space_id_id, start_time, end_time FROM cctv_files')
+#        ctx = {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list, 'form': form,}
+#        return render(request, 'cctv/file_manage.html', ctx)
+
+    files_list = Files.objects.raw(
+        'SELECT files.file_name, files.file, files.CCTV_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id')
+    if request.method == "POST" and request.POST['mode'] =="select":
+        cctv_id = request.POST['cctv_id']         # 여기부터
+        if cctv_id == "":                            # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            cctv_id = "%"                            # 여기까지
+        dong = request.POST['dong']             # 여기부터
+        if dong == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            dong = "%"                              # 여기까지
+        building_name = request.POST['building_name']             # 여기부터
+        if building_name == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            building_name = "%"                              # 여기까지
+        flr = request.POST['flr']             # 여기부터
+        if flr == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            flr = "%"                              # 여기까지
+        location = request.POST['location']             # 여기부터
+        if location == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            location = "%"                              # 여기까지
+        start_time = request.POST['start_time']             # 여기부터
+        if start_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            start_time = "%"                              # 여기까지
+        end_time = request.POST['end_time']             # 여기부터
+        if end_time == "":                              # 공백이 입력된 경우 전체 값을 검색하기 위한 처리과정
+            end_time = "%"                              # 여기까지
+        files_list = Files.objects.raw('SELECT files.file_name, files.file, files.CCTV_id_id, space.dong, space.building_name, space.flr, space.location, files.start_time, files.end_time FROM cctv_files AS files, cctv_shoot_space AS space WHERE files.Shoot_space_id_id = space.id AND files.CCTV_id_id like %s AND files.Shoot_space_id_id IN (SELECT id FROM cctv_shoot_space WHERE dong like %s AND building_name like %s AND flr like %s AND location like %s) AND files.start_time like %s AND files.end_time like %s', [cctv_id, dong, building_name, flr, location, start_time, end_time])
+    form = FilesForm(request.POST, request.FILES)
+    ctx = {'files_list': files_list, 'cctv_list' : cctv_list, 'space_list' : space_list, 'form': form, }
+    return render(request, 'cctv/log_read.html', ctx)
+
 
 #여기에 def로 정의한 함수 cctv/urls.py에도 추가하기
 @login_required
