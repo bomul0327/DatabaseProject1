@@ -40,7 +40,7 @@ def shoot_space_manage(request):
         [request.user.username])
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s',
                                  [request.user.username])
-    if request.user.username == "admin":
+    if request.user.is_staff == True:
         shoot_space_list = Shoot_space.objects.raw('SELECT cc.id, ss.id AS space_id , ss.dong, ss.building_name, ss.flr, ss.location FROM cctv_shoot_space AS ss, cctv_shoot AS sh, cctv_cctv AS cc WHERE ss.id = sh.Shoot_space_id_id AND cc.id = sh.CCTV_id_id')
         cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
 
@@ -59,7 +59,7 @@ def shoot_space_manage(request):
 @login_required
 def file_manage(request):
     cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv WHERE manager_id = %s',[request.user.username])
-    if request.user.username == "admin":
+    if request.user.is_staff == True:
         cctv_list = CCTV.objects.raw('SELECT id, model_name, install_date, manager_id FROM cctv_cctv')
     space_list = Shoot_space.objects.raw('SELECT id FROM cctv_shoot_space')
 
@@ -115,7 +115,7 @@ def log_read(request):
 def my_page(request):
     manager = Manager.objects.raw('SELECT auth_user.id, auth_user.username, manager.pos, manager.phonenum FROM cctv_manager AS manager, auth_user WHERE auth_user.username = %s AND manager.user_id = auth_user.id', [request.user.username])
     cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv WHERE manager_id = %s', [request.user.username])
-    if request.user.username == "admin":
+    if request.user.is_staff == True:
         cctv_list = CCTV.objects.raw('SELECT id, manager_id FROM cctv_cctv')
     with connection.cursor() as form:
         form = connection.cursor()
