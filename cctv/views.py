@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from .forms import FilesForm
+import os
 
 from .models import Manager, Shoot_space, CCTV, Shoot, Files, Neighborhood, Sequence, Statistics, Record #DB Table과 HTML을 연결해주는 역할
 #테이블 이름은 cctv_'객체명' , eg: cctv_manager, cctv_shoot_space ...
@@ -316,3 +317,14 @@ def space_manage(request):
     return render(request, 'cctv/space_manage.html',
                   {'space_list': space_list, 'neighbor_list': neighbor_list, 'sequences': sequences,
                    'sequence_list': sequence_list})
+
+@login_required
+def download(request):
+    file_path = request.path
+    if os.path.exists('media' + file_path):
+        with open('media' + file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/force-download")
+            response['Content-Disposition'] = 'inline; filename=' + file_path
+            return response
+        return HttpResponse("NOTHING")
+
