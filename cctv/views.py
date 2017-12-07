@@ -326,5 +326,5 @@ def download(request):
             response = HttpResponse(fh.read(), content_type="application/force-download")
             response['Content-Disposition'] = 'inline; filename=' + file_path
             return response
-        return HttpResponse("NOTHING")
+    return HttpResponse("NOTHING")
 
